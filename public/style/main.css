@@ -1,0 +1,215 @@
+body{
+	
+}
+#wrapper{
+	max-width: 1000px;
+	margin-right: auto;
+	margin-left: auto;
+}
+#header {
+	font-size: 20px;
+	vertical-align: top;
+	text-align: center;
+	width: 100%;
+}
+#head {
+	font-weight: bold;
+	font-family: verdana;
+	text-align: center;
+}
+#projektnamn, #namn {
+	text-align: left;
+}
+@media screen and (min-width: 450px) {
+	.table {
+		display: table;
+	}
+	.tr {
+		display: table-row;
+	}
+	.td{
+		display: table-cell;
+	}
+	#projektnamn {
+		text-align: right;
+	}
+}
+input, select, #klockadata, p {
+	zoom: 1.5;
+}
+i, input, select, #klockadata, p {
+	margin: 5px;
+}
+#login, #projekt, #klocka, #klockaannantid, #loggwrapper, #loggedit, #skrivut, #statistik, #pengar{
+	border: solid #000 3px;
+}
+#loggwrapper table, #detaljtable{
+	margin: 5px 10px 10px 10px;
+}
+.checkboxwrapper{
+	display: inline-block;
+	white-space: nowrap;
+}
+#loggwrapper table{
+	margin-bottom: 10px;
+}
+#loggwrapper table, #loggwrapper table td, #skrivutpapper table, #skrivutpapper table td, #admin table, #admin table td, #detaljtable, #detaljtable td{
+	border-collapse: collapse;
+	border: solid 2px #000;
+}
+#skrivutpapper table, #skrivutpapper table tr{
+	width: 100%;
+}
+#skrivutpapper table tbody tr, #admin table tbody tr{
+	text-align: center;
+}
+#skrivutpapper table thead tr{
+	font-weight: bold;
+	border-bottom: solid 3px #000;
+}
+#skrivutpapper table tbody tr td.projektnamn, #skrivutpapper table thead tr td:nth-child(1){
+	text-align: left;
+	border-right: solid 3px #000;
+}
+#skrivutpapper table tbody tr.topborder{
+	border-top: solid 3px #000;
+}
+#skrivutpapper table td{
+	vertical-align: middle;
+}
+i:hover{
+	color: blue;
+}
+.center{
+	display: flex;
+	align-items: center;
+	justify-content: center;
+}
+.left{
+	display: flex;
+	align-items: left;
+	justify-content: left;
+}
+i{
+	-webkit-transition: all 200ms linear;
+    -moz-transition: all 200ms linear;
+    -o-transition: all 200ms linear;
+    -ms-transition: all 200ms linear;
+    transition: all 200ms linear;
+}
+@media screen and (min-width: 650px) {
+	#projekt i{
+		font-size: 7em!important;
+	}
+	#buttonwrapper{
+		text-align: center;
+	}
+}
+#loggwrapper table {
+	margin-left: auto;
+	margin-right: auto;
+}
+#loggwrapper table tbody td{
+	padding: 10px;
+}
+@media screen and (max-width: 300px) {
+	#projekt select, input[type=text], input[type=button], input[type=date], input[type=time]{
+		width: 88%;
+	}
+	.center{
+		display: inline-block;
+		align-items: left;
+		justify-content: left;
+	}
+}
+@media screen and (max-width: 700px) {
+	#loggwrapper table{
+		width: 100%;
+	}
+	#loggwrapper table select{
+		margin: 0px;
+	}
+	#loggwrapper table tbody td{
+		padding: 5px;
+	}
+}
+@media screen and (max-width: 500px) {
+	#idnamn{
+		zoom: 3;
+		width: 88%;
+		margin-right: 0px;
+		margin-left: 0px;
+		padding-right: 0px;
+		padding-left: 0px;
+	}
+}
+@media print { 
+	#login, #projekt, #klocka, #klockaannantid, #loggwrapper, #loggedit, #skrivut, #namn, #projektnamn, #head, #admin, #statistik, #pengar, #loader, #overlay{
+		display: none;
+	}
+	#skrivutpapper{
+		display: block!important;
+	}
+	#skrivutpapper table{
+		border: solid #000 3px;
+	}
+}
+.disable{
+	opacity: 0.5;
+}
+i.disable:hover{
+	color: #000;
+}
+#klockadata{
+	text-align: center;
+}
+.fa-money{
+	-webkit-transform: rotate(-20deg);
+	-moz-transform: rotate(-20deg);
+	-ms-transform: rotate(-20deg);
+	-o-transform: rotate(-20deg);
+	filter: progid:DXImageTransform.Microsoft.BasicImage(rotation=2.2);
+}
+
+#loader {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  z-index:1002;
+  width: 150px;
+  height: 150px;
+  margin: -75px 0 0 -75px;
+  border: 16px solid #f3f3f3;
+  border-radius: 50%;
+  border-top: 16px solid #3498db;
+  width: 120px;
+  height: 120px;
+  -webkit-animation: spin 2s linear infinite;
+  animation: spin 2s linear infinite;
+}
+
+@-webkit-keyframes spin {
+  0% { -webkit-transform: rotate(0deg); }
+  100% { -webkit-transform: rotate(360deg); }
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+#overlay {
+    position:fixed;
+    top:0;
+    bottom:0;
+    left:0;
+    right:0;
+    background-color:#fff;
+    opacity:0.8;
+    z-index:1001;
+}
+.fa-toggle-on, .fa-toggle-on:hover {
+	color: green;
+}
+#footer{
+	text-align: center;
+}

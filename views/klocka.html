@@ -1,0 +1,93 @@
+#head#
+#header#
+<div id="klocka">
+	#iconstart#arrow-circle-left fa-3x#iconextra#onclick="tillbakatillprojekt();"#iconend#
+	<div id="klockadata">
+		<span id="intid">XX:XX</span> <span id="tid"#timecount#>XX:XX:XX</span>
+	</div>
+	<div class="center">
+	#klockbuttons#
+	</div>
+	<p>Annan tid: <span class="checkboxwrapper">#klockbuttonsannat#</span><i class="fa fa-money" aria-hidden="true" onclick="showpengar();"></i></p>
+</div>
+<script type="text/javascript">
+	function tillbakatillprojekt(){
+		var anv = document.getElementById('namn').getAttribute('data-vgrid');
+		window.open('/index.html?anv=' + anv + '&toshow=login','_self')
+	};
+	function addzero(number){if(number <= 9){return "0" + number;}else{return number;};};
+	function getDate(dateannan, timeannan, milisecsave){
+		if(!dateannan && !timeannan && !milisecsave){
+			var date = new Date();
+		}else if(!milisecsave){
+			var annatdatum = dateannan.split('-');
+			var annattid = timeannan.split(':');
+			var date = new Date(annatdatum[0], annatdatum[1] - 1, annatdatum[2], annattid[0], annattid[1]);
+		}else{
+			var date = new Date(parseInt(milisecsave));
+		};
+		var y = date.getFullYear();
+		var m = date.getMonth() + 1;
+		var d = date.getDate();
+		var h = date.getHours();
+		var mm = date.getMinutes();
+		var milisec = date.getTime();
+		var datum = y + '-' + addzero(m) + '-' + addzero(d);
+		var tid = addzero(h) + ':' + addzero(mm);
+		return {"datum": datum, "tid": tid, "milisec": milisec};
+	};
+	function removechilds(parent){while (parent.hasChildNodes()) {parent.removeChild(parent.firstChild);};};
+	function timebetween(start, stop, millisec){
+		if(!millisec){
+			var sekunder = parseInt(stop) / 1000 - parseInt(start) / 1000;
+		}else{
+			var sekunder = parseInt(millisec) / 1000;
+		};
+		var t = Math.floor(sekunder / 3600);
+		var m = Math.floor((sekunder / 60) - (t * 60));
+		var s = Math.floor(sekunder - (m * 60) - (t * 3600));
+		return {"t": t, "m": m, "s": s};
+	};
+	var countinterval;
+	function startclock(todo){
+		var projekt = document.getElementById('projektnamn').getAttribute('data-projektnamn');
+		var anv = document.getElementById('namn').getAttribute('data-vgrid');
+		if(todo == 'nu'){
+			var datum = getDate();
+			window.open('/index.html?anv=' + anv + '&toshow=klocka&projektnamn=' + projekt + '&starttime=' + datum.milisec,'_self')
+		}
+	};
+	function stopclock(todo){
+		clearInterval(countinterval);
+		var projekt = document.getElementById('projektnamn').getAttribute('data-projektnamn');
+		var anv = document.getElementById('namn').getAttribute('data-vgrid');
+		if(todo == 'nu'){
+			var datum = getDate();
+			window.open('/index.html?anv=' + anv + '&toshow=klocka&projektnamn=' + projekt + '&stoptime=' + datum.milisec,'_self')
+		}
+	};
+	function startcount(){
+		var tidraknare = document.getElementById('tid');
+		var inmilisec = tidraknare.getAttribute('data-milisec');
+		if(!inmilisec){}else{
+			var dobj = getDate();
+			var timecalc = timebetween(inmilisec, dobj.milisec);
+			removechilds(tidraknare);
+			var tidraknaretext = document.createTextNode(addzero(timecalc.t) + ':' + addzero(timecalc.m) + ':' + addzero(timecalc.s));
+			tidraknare.appendChild(tidraknaretext);
+		};
+	};
+	function load(){
+		var tidraknare = document.getElementById('tid');
+		var inmilisec = tidraknare.getAttribute('data-milisec');
+		if(!inmilisec){}else{
+			var intid = document.getElementById('intid')
+			removechilds(intid);
+			intid.appendChild(document.createTextNode(getDate('', '', inmilisec).tid));
+			startcount();
+			countinterval = setInterval(function(){ startcount(); }, 1000);
+		};
+	};
+	load();
+</script>
+#footer#

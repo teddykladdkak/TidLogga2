@@ -1,0 +1,11 @@
+{
+  "name": "tidlogga2",
+  "version": "1.0.0",
+  "description": "Nästa tappning av TidLogga projektet som nu med hjälp av express kommer hantera design och kommunikation mellan klient och server, försöka avveckla Webbsocket tekniken som användes i version 1.",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "Mattias Lidbeck",
+  "license": "MIT"
+}
