@@ -20,7 +20,8 @@ var param = {
 		users: 'user/',
 		script: 'script/'
 	},
-	hidelink: false
+	hidelink: false,
+	splacertoken: '#'
 };
 
 // Gör att man kan läsa svar från klient med json
@@ -158,7 +159,6 @@ function htmltidloggningar(loggningar){
 			var tohtml = tohtml + '<tr data-milisecin="' + loggningar[i].in + '" data-milisecut="' + loggningar[i].ut + '"><td>' + indobj.datum + '</td><td>' + indobj.tid + '</td><td>' + utdobj.tid + '</td><td>' + addzero(time.t) + ':' + addzero(time.m) + ':' + addzero(time.s) + '</td><td><i class="fa fa-trash fa-3x" aria-hidden="true" onclick="removesegment(this);"></i><i class="fa fa-pencil-square-o fa-3x" aria-hidden="true" onclick="showedit(this);"></i></td></tr>';
 		};
 	};
-	console.log(tohtml);
 	return tohtml;
 };
 
@@ -191,34 +191,30 @@ app.engine('html', function (filePath, options, callback) {
   })
 }).set('views', './views').set('view engine', 'html').use(express.static('public'))
 
-
 var users = [];
 function searchusers(){
-	fs.readdir(param.link.users, function(err, mappedusers) {
-		console.log(mappedusers)
-		var num = mappedusers.indexOf('.DS_Store');
-		mappedusers.splice(num, 1);
-		console.log(mappedusers);
-		if(mappedusers.length == 0){
-			makeDir(param.link.users + 'test#Test Testsson').then(path => {
-				console.log('Kontot test lades till');
-				searchusers();
-			});
-		}else{
-			for (var i = mappedusers.length - 1; i >= 0; i--) {
-				var user = mappedusers[i].split('#');
-				fs.readdir(param.link.users + mappedusers[i] + '/', function(err, mappedprojekt) {
-					console.log(mappedprojekt)
-					var num = mappedprojekt.indexOf('.DS_Store');
-					mappedprojekt.splice(num, 1);
-					console.log(mappedprojekt);
-					users.push({vgrid: user[0], namn: user[1], projekt: mappedprojekt});
-				});
-			};
+	var findusers = fs.readdirSync(param.link.users);
+	if(findusers.length == 0){
+		makeDir(param.link.users + 'test' + param.splacertoken + 'Test Testsson/').then(path => {
+			console.log('Test Testsson lades till.');
+			searchusers();
+		});
+	}else{
+		var usersnum = findusers.indexOf('.DS_Store');
+		if(usersnum == '-1'){}else{
+			findusers.splice(usersnum, 1);
 		};
-	});
+		for (var i = findusers.length - 1; i >= 0; i--) {
+			var projects = fs.readdirSync(param.link.users + findusers[i] + '/');
+			var projectsnum = projects.indexOf('.DS_Store');
+			if(projectsnum == '-1'){}else{
+				projects.splice(projectsnum, 1);
+			};
+			var usersplit = findusers[i].split(param.splacertoken);
+			users.push({vgrid: usersplit[0], namn: usersplit[1], projekt: projects});
+		};
+	};
 };
-
 if(!exists(param.link.users, '/')){
 	makeDir(param.link.users).then(path => {
 		console.log('Mappen users skapades');
@@ -230,7 +226,7 @@ if(!exists(param.link.users, '/')){
 
 
 function addutklock(vgrid, namn, projektnamn, millisec){
-	var mapp = param.link.users + vgrid + '#' + namn + '/' + projektnamn + '/';
+	var mapp = param.link.users + vgrid + param.splacertoken + namn + '/' + projektnamn + '/';
 	fs.readdir(mapp, function(err, projekttider) {
 		if(projekttider.length == 0){}else{
 			for (var a = projekttider.length - 1; a >= 0; a--) {
@@ -253,7 +249,7 @@ function addutklock(vgrid, namn, projektnamn, millisec){
 };
 
 function addinklock(vgrid, namn, projektnamn, millisec){
-	var mapp = param.link.users + vgrid + '#' + namn + '/' + projektnamn + '/';
+	var mapp = param.link.users + vgrid + param.splacertoken + namn + '/' + projektnamn + '/';
 	var dobj = getDate('', '', millisec)
 	if(exists(dobj.manad + '.json', mapp)){
 		var data = JSON.parse(fs.readFileSync(mapp + dobj.manad + '.json', 'utf8'));
@@ -272,12 +268,12 @@ function addinklock(vgrid, namn, projektnamn, millisec){
 
 app.get(['/', '/index.html'], function (req, res) {
 	var anv = req.query.anv;
-	if(!anv || anv == ''){
+	if(!anv || anv == '' || users.length == 0){
 		res.render('index', {"anv": "", "projekt": "", "projektnamn": ""})
 	}else{
 		for (var i = users.length - 1; i >= 0; i--) {
 			if(users[i].vgrid == anv){
-				var mapp = param.link.users + users[i].vgrid + '#' + users[i].namn + '/' + req.query.projektnamn + '/';
+				var mapp = param.link.users + users[i].vgrid + param.splacertoken + users[i].namn + '/' + req.query.projektnamn + '/';
 				var vgrid = users[i].vgrid;
 				var namn = users[i].namn;
 				var projekt = users[i].projekt;
@@ -299,32 +295,34 @@ app.get(['/', '/index.html'], function (req, res) {
 					}else{
 						var sendstoptime = stoptime;
 					};
-					fs.readdir(mapp, function(err, projekttider) {
-						var inklockad = false;
-						if(projekttider.length == 0){}else{
-							for (var a = projekttider.length - 1; a >= 0; a--) {
-								var data = JSON.parse(fs.readFileSync(mapp + projekttider[a], 'utf8'));
-								for (var b = data.length - 1; b >= 0; b--) {
-									if(data[b].ut == ''){
-										inklockad = data[b].in;
-									};
+					var projekttider = fs.readdirSync(mapp);
+					var inklockad = false;
+					if(projekttider.length == 0){}else{
+						for (var a = projekttider.length - 1; a >= 0; a--) {
+							var data = JSON.parse(fs.readFileSync(mapp + projekttider[a], 'utf8'));
+							for (var b = data.length - 1; b >= 0; b--) {
+								if(data[b].ut == ''){
+									inklockad = data[b].in;
 								};
 							};
 						};
-						if(!inklockad || inklockad == ''){
-							//Person är inte inte inklockad
-							if(!sendstarttime || sendstarttime == ''){}else{
-								addinklock(vgrid, namn, projektnamn, sendstarttime);
-							};
-						}else{
-							if(!sendstoptime || sendstoptime == ''){}else{
-								addutklock(vgrid, namn, projektnamn, sendstoptime);
-							};
+					};
+					if(!inklockad || inklockad == ''){
+						//Person är inte inte inklockad
+						if(!sendstarttime || sendstarttime == ''){}else{
+							addinklock(vgrid, namn, projektnamn, sendstarttime);
 						};
-						res.render(req.query.toshow, {"vgrid": vgrid, "namn": namn, "projekt": projekt, "projektnamn": projektnamn, "starttime": sendstarttime, "stoptime": sendstoptime, "inklockad": inklockad})
-					});
+					}else{
+						if(!sendstoptime || sendstoptime == ''){}else{
+							addutklock(vgrid, namn, projektnamn, sendstoptime);
+						};
+					};
+					res.render(req.query.toshow, {"vgrid": vgrid, "namn": namn, "projekt": projekt, "projektnamn": projektnamn, "starttime": sendstarttime, "stoptime": sendstoptime, "inklockad": inklockad})
 				}else if(toshow == 'logg'){
-					fs.readdir(mapp, function(err, datum) {
+					var datum = fs.readdirSync(mapp);
+					if(datum.length == 0){
+						res.render('login', {"vgrid": vgrid, "namn": namn, "projekt": projekt, "projektnamn": ""})
+					}else{
 						for (var i = datum.length - 1; i >= 0; i--) {
 							datum[i] = datum[i].replace(/.json/g, '');
 						};
@@ -337,7 +335,7 @@ app.get(['/', '/index.html'], function (req, res) {
 							var loggningar = JSON.parse(fs.readFileSync(mapp + todayfilename, 'utf8'));
 							res.render(toshow, {"vgrid": vgrid, "namn": namn, "projekt": projekt, "projektnamn": projektnamn, "projektdatum": datum, "tidloggningar": loggningar, "todayfilename": todayfilename})
 						};
-					});
+					};
 				}else{
 					res.render('index', {"vgrid": "", "namn": "", "projekt": "", "projektnamn": ""})
 				};
