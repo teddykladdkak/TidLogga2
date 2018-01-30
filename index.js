@@ -9,7 +9,7 @@ var bodyParser = require('body-parser'); //Bilbiotek för att hantera post
 
 //Parametrar till stil
 var param = {
-	port: 8080,
+	port: 3333,
 	titel: 'TidLogga',
 	beskrivning: 'Tidloggning när det är som bäst! Minimalistiskt, ikonbaserat utseende för snabbare interaktion!',
 	url: 'http://www.tidlogga.tk/',
@@ -27,6 +27,15 @@ var param = {
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
 
+//Kontrollerar ifall fil existerar
+function exists(path, dir){
+	var wholepath = __dirname + '/' + dir + path;
+	if (fs.existsSync(wholepath)) {
+		return true;
+	}else{
+		return false;
+	};
+};
 // Datum funktion
 function addzero(number){if(number <= 9){return "0" + number;}else{return number;};};
 function getDate(dateannan, timeannan, milisecsave){
@@ -75,11 +84,22 @@ function activevar(variabel){
 };
 
 //Skapar html utifrån variabler
-function htmldatumlist(projektdatum){
+function htmldatumlist(projektdatum, todayfilename){
 	var tohtml = '';
 	if(activevar(projektdatum)){
 		for (var i = projektdatum.length - 1; i >= 0; i--) {
-			var tohtml = tohtml + '<option value="' + projektdatum[i] + '">' + projektdatum[i] + '</option>'
+			console.log(todayfilename + ' -- ' + projektdatum[i]);
+			if(!todayfilename){
+				var selected = '';
+			}else{
+				var todayfilename = todayfilename.replace('.json', '');
+				if(todayfilename == projektdatum[i]){
+					var selected = ' selected';
+				}else{
+					var selected = '';
+				};
+			};
+			var tohtml = tohtml + '<option value="' + projektdatum[i] + '"' + selected + '>' + projektdatum[i] + '</option>'
 		};
 	};
 	return tohtml;
@@ -145,7 +165,7 @@ function htmltidloggningar(loggningar){
 //Mall kod
 app.engine('html', function (filePath, options, callback) {
   fs.readFile(filePath, function (err, content) {
-  	var projektdatum = htmldatumlist(options.projektdatum);
+  	var projektdatum = htmldatumlist(options.projektdatum, options.todayfilename);
   	var tidloggningar = htmltidloggningar(options.tidloggningar);
   	var projektselect = htmlprojektselect(options.projekt);
 	var startstoptime = htmlstartstoptime(options.inklockad, options.starttime, options.stoptime);
@@ -171,18 +191,42 @@ app.engine('html', function (filePath, options, callback) {
   })
 }).set('views', './views').set('view engine', 'html').use(express.static('public'))
 
+
 var users = [];
 function searchusers(){
 	fs.readdir(param.link.users, function(err, mappedusers) {
-		for (var i = mappedusers.length - 1; i >= 0; i--) {
-			var user = mappedusers[i].split('#');
-			fs.readdir(param.link.users + mappedusers[i] + '/', function(err, mappedprojekt) {
-				users.push({vgrid: user[0], namn: user[1], projekt: mappedprojekt});
+		console.log(mappedusers)
+		var num = mappedusers.indexOf('.DS_Store');
+		mappedusers.splice(num, 1);
+		console.log(mappedusers);
+		if(mappedusers.length == 0){
+			makeDir(param.link.users + 'test#Test Testsson').then(path => {
+				console.log('Kontot test lades till');
+				searchusers();
 			});
+		}else{
+			for (var i = mappedusers.length - 1; i >= 0; i--) {
+				var user = mappedusers[i].split('#');
+				fs.readdir(param.link.users + mappedusers[i] + '/', function(err, mappedprojekt) {
+					console.log(mappedprojekt)
+					var num = mappedprojekt.indexOf('.DS_Store');
+					mappedprojekt.splice(num, 1);
+					console.log(mappedprojekt);
+					users.push({vgrid: user[0], namn: user[1], projekt: mappedprojekt});
+				});
+			};
 		};
 	});
 };
-searchusers();
+
+if(!exists(param.link.users, '/')){
+	makeDir(param.link.users).then(path => {
+		console.log('Mappen users skapades');
+		searchusers();
+	});
+}else{
+	searchusers();
+};
 
 
 function addutklock(vgrid, namn, projektnamn, millisec){
@@ -226,16 +270,6 @@ function addinklock(vgrid, namn, projektnamn, millisec){
 	});
 };
 
-//Kontrollerar ifall fil existerar
-function exists(path, dir){
-	var wholepath = __dirname + '/' + dir + path;
-	if (fs.existsSync(wholepath)) {
-		return true;
-	}else{
-		return false;
-	};
-};
-
 app.get(['/', '/index.html'], function (req, res) {
 	var anv = req.query.anv;
 	if(!anv || anv == ''){
@@ -251,6 +285,7 @@ app.get(['/', '/index.html'], function (req, res) {
 				var toshow = req.query.toshow;
 				var starttime = req.query.starttime;
 				var stoptime = req.query.stoptime;
+				var datetofetch = req.query.datetofetch;
 				if(toshow == 'login'){
 					res.render(toshow, {"vgrid": vgrid, "namn": namn, "projekt": projekt, "projektnamn": ""})
 				}else if(toshow == 'klocka'){
@@ -293,10 +328,14 @@ app.get(['/', '/index.html'], function (req, res) {
 						for (var i = datum.length - 1; i >= 0; i--) {
 							datum[i] = datum[i].replace(/.json/g, '');
 						};
-						var todayfilename = getDate().manad + '.json';
+						if(!datetofetch){
+							var todayfilename = getDate().manad + '.json';
+						}else{
+							var todayfilename = datetofetch + '.json';
+						};
 						if(exists(todayfilename, mapp)){
 							var loggningar = JSON.parse(fs.readFileSync(mapp + todayfilename, 'utf8'));
-							res.render(toshow, {"vgrid": vgrid, "namn": namn, "projekt": projekt, "projektnamn": projektnamn, "projektdatum": datum, "tidloggningar": loggningar})
+							res.render(toshow, {"vgrid": vgrid, "namn": namn, "projekt": projekt, "projektnamn": projektnamn, "projektdatum": datum, "tidloggningar": loggningar, "todayfilename": todayfilename})
 						};
 					});
 				}else{
