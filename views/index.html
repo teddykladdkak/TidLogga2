@@ -19,6 +19,7 @@
 		};
 	};
 	function loggain(){
+		checkifsave();
 		var anv = document.getElementById('idnamn').value;
 		if(anv == ''){}else{
 			window.open('/index.html?anv=' + anv + '&toshow=login','_self')
@@ -52,5 +53,9 @@
 			localStorage.removeItem('tidlogganamn');
 		};
 	};
+	function load(){
+		checksave();
+	};
+	load();
 </script>
 #footer#
