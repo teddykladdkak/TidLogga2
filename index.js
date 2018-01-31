@@ -96,7 +96,6 @@ function htmldatumlist(projektdatum, todayfilename){
 	var tohtml = '';
 	if(activevar(projektdatum)){
 		for (var i = projektdatum.length - 1; i >= 0; i--) {
-			console.log(todayfilename + ' -- ' + projektdatum[i]);
 			if(!todayfilename){
 				var selected = '';
 			}else{
@@ -112,11 +111,17 @@ function htmldatumlist(projektdatum, todayfilename){
 	};
 	return tohtml;
 };
-function htmlprojektselect(projekt){
+function htmlprojektselect(projekt, historyprojekt){
 	var tohtml = '';
+	console.log(historyprojekt)
 	if(activevar(projekt)){
 		for (var i =  projekt.length - 1; i >= 0; i--) {
-			var tohtml = tohtml + '<option value="' +  projekt[i] + '">' +  projekt[i] + '</option>';
+			if(historyprojekt == projekt[i]){
+				var selected = ' selected';
+			}else{
+				var selected = '';
+			};
+			var tohtml = tohtml + '<option value="' +  projekt[i] + '"' + selected + '>' +  projekt[i] + '</option>';
 		};
 	};
 	return tohtml;
@@ -168,22 +173,34 @@ function htmltidloggningar(loggningar){
 	};
 	return tohtml;
 };
+function htmlprojektnamn(url, projektnamn){
+	if(!url || !projektnamn){
+		return '';
+	}else{
+		var spliturl = url.split('/');
+		if(spliturl[spliturl.length - 1] == 'login.html'){
+			return '';
+		}else{
+			return projektnamn;
+		};
+	};
+};
 
 //Mall kod
 app.engine('html', function (filePath, options, callback) {
   fs.readFile(filePath, function (err, content) {
   	var projektdatum = htmldatumlist(options.projektdatum, options.todayfilename);
   	var tidloggningar = htmltidloggningar(options.tidloggningar);
-  	var projektselect = htmlprojektselect(options.projekt);
+  	var projektselect = htmlprojektselect(options.projekt, options.projektnamn);
 	var startstoptime = htmlstartstoptime(options.inklockad, options.starttime, options.stoptime);
 	var greeting = valkommenhtml(options.namn);
+	var projektnamn = htmlprojektnamn(filePath, options.projektnamn);
 
-	
 	// Döljer eller visar kod som skickas till server i url
 	if(!param.hidelink){var hidelinkscript = '';}else{var hidelinkscript = '<script type="text/javascript">history.pushState(null, \'\', location.href.split(\'?\')[0]);</script>';};
     var rendered = content.toString()
     	.replace('#head#', '<!DOCTYPE html><html><head><title>TidLogga</title>' + hidelinkscript + '<meta http-equiv="Content-Type" content="text/html; charset=UTF-8"><meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1"><meta content="yes" name="apple-mobile-web-app-capable"><meta content="yes" name="mobile-web-app-capable"><meta content="minimum-scale=1.0, width=device-width, maximum-scale=0.6667, user-scalable=no" name="viewport"><meta name="apple-mobile-web-app-status-bar-style" content="black"><link rel="shortcut icon" href="' + param.link.icons + 'icon.ico"><link rel="icon" type="image/vnd.microsoft.icon" href="' + param.link.icons + 'icon.ico"><link rel="icon" type="image/png" href="' + param.link.icons + 'icon196x196.png"><link rel="apple-touch-icon-precomposed" href="' + param.link.icons + 'icon180x180.png"><link rel="apple-touch-icon-precomposed" sizes="76x76" href="' + param.link.icons + 'icon76x76.png"><link rel="apple-touch-icon-precomposed" sizes="120x120" href="' + param.link.icons + 'icon120x120.png"><link rel="apple-touch-icon-precomposed" sizes="152x152" href="' + param.link.icons + 'icon152x152.png"><link rel="stylesheet" href="' + param.link.style + 'font-awesome/css/font-awesome.css"><link rel="stylesheet" href="' + param.link.style + 'main.css"><script type="application/javascript" src="' + param.link.script + 'main.js"></script>')
-    	.replace('#header#', '</head><body><div id="wrapper"><div id="head">TidLogga</div><div id="header" class="table"><div class="tr"><div id="namn" class="td" data-namn="' + options.namn + '" data-vgrid="' + options.vgrid + '">' + greeting + '</div><div id="projektnamn" class="td" data-projektnamn="' + options.projektnamn + '">' + options.projektnamn + '</div></div></div>')
+    	.replace('#header#', '</head><body><div id="wrapper"><div id="head">TidLogga</div><div id="header" class="table"><div class="tr"><div id="namn" class="td" data-namn="' + options.namn + '" data-vgrid="' + options.vgrid + '">' + greeting + '</div><div id="projektnamn" class="td" data-projektnamn="' + projektnamn + '">' + projektnamn + '</div></div></div>')
     	.replace('#footer#', '</div><div id="footer">2018&nbsp;©&nbsp;Mattias Lidbeck&nbsp;¦&nbsp;{<a href="https://www.teddyprojekt.tk/" alt="Länk till denna sida" onclick="internlink(this, event);">www.teddyprojekt.tk</a>}</div></body></html>')
     	.replace('#projektselect#', projektselect)
     	.replace('#klockbuttons#', startstoptime.main)
@@ -234,25 +251,20 @@ if(!exists(param.link.users, '/')){
 
 function addutklock(vgrid, namn, projektnamn, millisec){
 	var mapp = param.link.users + vgrid + param.splacertoken + namn + '/' + projektnamn + '/';
-	fs.readdir(mapp, function(err, projekttider) {
-		if(projekttider.length == 0){}else{
-			for (var a = projekttider.length - 1; a >= 0; a--) {
-				var data = JSON.parse(fs.readFileSync(mapp + projekttider[a], 'utf8'));
-				for (var b = data.length - 1; b >= 0; b--) {
-					if(data[b].ut == ''){
-						data[b].ut = millisec;
-						var datatosave = data;
-						fs.writeFile(mapp + projekttider[a], JSON.stringify(datatosave, null, ' '), (err) => {
-							if (err){
-								console.log('Något gick fel i skapandet av ny fil.')
-							}else{};
-						});
-						break;
-					};
+	var projekttider = fs.readdirSync(mapp);
+	if(projekttider.length == 0){}else{
+		for (var a = projekttider.length - 1; a >= 0; a--) {
+			var data = JSON.parse(fs.readFileSync(mapp + projekttider[a], 'utf8'));
+			for (var b = data.length - 1; b >= 0; b--) {
+				if(data[b].ut == ''){
+					data[b].ut = millisec;
+					var datatosave = data;
+					fs.writeFileSync(mapp + projekttider[a], JSON.stringify(datatosave, null, ' '))
+					break;
 				};
 			};
 		};
-	});
+	};
 };
 
 function addinklock(vgrid, namn, projektnamn, millisec){
@@ -264,13 +276,7 @@ function addinklock(vgrid, namn, projektnamn, millisec){
 	}else{
 		var data = [{"in": millisec, "ut": ""}];
 	};
-	fs.writeFile(mapp + dobj.manad + '.json', JSON.stringify(data, null, ' '), (err) => {
-		if (err){
-			console.log('Något gick fel i skapandet av ny fil.')
-		}else{
-			console.log('".in" sparades.')
-		};
-	});
+	fs.writeFileSync(mapp + dobj.manad + '.json', JSON.stringify(data, null, ' '))
 };
 
 app.get(['/', '/index.html'], function (req, res) {
@@ -290,7 +296,7 @@ app.get(['/', '/index.html'], function (req, res) {
 				var stoptime = req.query.stoptime;
 				var datetofetch = req.query.datetofetch;
 				if(toshow == 'login'){
-					res.render(toshow, {"vgrid": vgrid, "namn": namn, "projekt": projekt, "projektnamn": ""})
+					res.render(toshow, {"vgrid": vgrid, "namn": namn, "projekt": projekt, "projektnamn": projektnamn})
 				}else if(toshow == 'klocka'){
 					if(!starttime){
 						var sendstarttime = '';
@@ -326,9 +332,38 @@ app.get(['/', '/index.html'], function (req, res) {
 					};
 					res.render(req.query.toshow, {"vgrid": vgrid, "namn": namn, "projekt": projekt, "projektnamn": projektnamn, "starttime": sendstarttime, "stoptime": sendstoptime, "inklockad": inklockad})
 				}else if(toshow == 'logg'){
+					if(!req.query.remove){}else{
+						console.log(req.query.remove);
+						var remove = JSON.parse(req.query.remove);
+						console.log(remove.in + ' -- ' + remove.ut);
+						var findloggning = JSON.parse(fs.readFileSync(mapp + datetofetch + '.json', 'utf8'));
+						for (var c = findloggning.length - 1; c >= 0; c--) {
+							if(remove.in == findloggning[c].in){
+								if(!remove.ut == '' && remove.ut == findloggning[c].ut){
+									findloggning.splice(c, 1);
+									var borttaget = true;
+								};
+							};
+						};
+						console.log(findloggning);
+						if(findloggning.length == 0){
+							fs.unlinkSync(mapp + datetofetch + '.json');
+						}else{
+							fs.writeFileSync(mapp + datetofetch + '.json', JSON.stringify(findloggning, null, ' '))
+						};
+						if(!req.query.change || !borttaget){}else{
+							var change = JSON.parse(req.query.change);
+							if(!change.in || change.in == ''){}else{
+								addinklock(vgrid, namn, projektnamn, change.in);
+								if(!change.ut || change.ut == ''){}else{
+									addutklock(vgrid, namn, projektnamn, change.ut)
+								};
+							};
+						};
+					};
 					var datum = fs.readdirSync(mapp);
 					if(datum.length == 0){
-						res.render('login', {"vgrid": vgrid, "namn": namn, "projekt": projekt, "projektnamn": ""})
+						res.render('login', {"vgrid": vgrid, "namn": namn, "projekt": projekt, "projektnamn": projektnamn})
 					}else{
 						for (var i = datum.length - 1; i >= 0; i--) {
 							datum[i] = datum[i].replace(/.json/g, '');
