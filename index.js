@@ -17,11 +17,18 @@ var param = {
 	link: {
 		icons: 'ico/',
 		style: 'style/',
-		users: 'user/',
+		users: '../../Spara/user/',
 		script: 'script/'
 	},
 	hidelink: false,
 	splacertoken: '#'
+};
+
+// Kontrollerar ifall spara mapp finns.
+if(!exists('../../Spara/', '/')){
+	makeDir('../../Spara/').then(path => {
+		console.log('Mappen spara');
+	});
 };
 
 // Gör att man kan läsa svar från klient med json
