@@ -33,7 +33,8 @@
 	};
 	function tillbakatillprojekt(){
 		var anv = document.getElementById('namn').getAttribute('data-vgrid');
-		window.open('/index.html?anv=' + anv + '&toshow=login','_self')
+		var projektnamn = document.getElementById('projektnamn').getAttribute('data-projektnamn');
+		window.open('/index.html?anv=' + anv + '&toshow=login&projektnamn=' + projektnamn,'_self')
 	};
 	function removesegment(element){
 		var anv = document.getElementById('namn').getAttribute('data-vgrid');

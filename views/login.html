@@ -1,12 +1,12 @@
 #head#
 #header#
 <div id="projekt">
-	<select id="listaprojekt"><option value="none">Välj Projekt</option>#projektselect#</select>
+	<select id="listaprojekt"><option value="">Välj Projekt</option>#projektselect#</select>
 	<div id="buttonwrapper">
 		<i class="fa fa-clock-o fa-4x" aria-hidden="true" onclick="oppnasida('klocka');"></i>
 		<i class="fa fa-list fa-4x" aria-hidden="true" onclick="oppnasida('logg');"></i>
-		<!-- <i class="fa fa-print fa-4x" aria-hidden="true" onclick="loadskrivut();"></i>
-		<i class="fa fa-pie-chart fa-4x" aria-hidden="true" onclick="getpie();"></i>
+		<i class="fa fa-print fa-4x" aria-hidden="true" onclick="oppnasida('rapport');"></i>
+		<!-- <i class="fa fa-pie-chart fa-4x" aria-hidden="true" onclick="getpie();"></i>
 		<i class="fa fa-user-plus fa-4x" aria-hidden="true" onclick="admin();"></i></div> -->
 </div>
 <script type="text/javascript">
@@ -14,14 +14,16 @@
 		var projekt = document.getElementById('listaprojekt').value;
 		var anv = document.getElementById('namn').getAttribute('data-vgrid');
 		if(todo == 'klocka' || todo == 'logg'){
-			if(projekt == 'none'){
+			if(projekt == ''){
 				document.getElementById('listaprojekt').setAttribute('style', 'border: solid 3px #F00')
 			}else{
 				window.open('/index.html?anv=' + anv + '&toshow=' + todo + '&projektnamn=' + projekt,'_self')
 			};
 		}else{
-			
-		}
+			if(todo == 'rapport'){
+				window.open('/index.html?anv=' + anv + '&toshow=' + todo + '&projektnamn=' + projekt,'_self')
+			};
+		};
 	};
 </script>
 #footer#

@@ -1,0 +1,22 @@
+#head#
+#header#
+<div id="skrivut">
+	<i class="fa fa-arrow-circle-left fa-3x" aria-hidden="true" onclick="tillbakatillprojekt();"></i>
+	#rapport#
+	<i class="fa fa-print fa-4x" aria-hidden="true" onclick="startprint('print');"></i>
+	<i class="fa fa-table fa-4x" aria-hidden="true" onclick="startprint('excell');"></i>
+</div>
+<script type="text/javascript">
+	function tillbakatillprojekt(){
+		var anv = document.getElementById('namn').getAttribute('data-vgrid');
+		var projektnamn = document.getElementById('projektnamn').getAttribute('data-projektnamn');
+		window.open('/index.html?anv=' + anv + '&toshow=login&projektnamn=' + projektnamn,'_self')
+	};
+	function startprint(){
+		var anv = document.getElementById('namn').getAttribute('data-vgrid');
+		var projekt = ['Digital Whiteboard', 'MatApp'];
+		var datum = document.getElementById('skrivutdatum').value;
+		window.open('/download?anv=' + anv + '&datum=' + datum + '&projektnamn=' + projekt.join('||||'),'_self')	
+	};
+</script>
+#footer#

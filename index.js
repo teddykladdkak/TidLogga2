@@ -6,6 +6,8 @@ const path = require('path');
 const makeDir = require('make-dir');
 const md5 = require("apache-md5"); // Skapar lösenord
 var bodyParser = require('body-parser'); //Bilbiotek för att hantera post
+var request = require('sync-request');
+const excel = require('node-excel-export');
 
 //Parametrar till stil
 var param = {
@@ -24,12 +26,6 @@ var param = {
 	splacertoken: '#'
 };
 
-// Kontrollerar ifall spara mapp finns.
-if(!exists('../../Spara/', '/')){
-	makeDir('../../Spara/').then(path => {
-		console.log('Mappen spara');
-	});
-};
 
 // Gör att man kan läsa svar från klient med json
 app.use(bodyParser.json());
@@ -38,12 +34,20 @@ app.use(bodyParser.urlencoded({ extended: true }));
 //Kontrollerar ifall fil existerar
 function exists(path, dir){
 	var wholepath = __dirname + '/' + dir + path;
+//	console.log(wholepath);
 	if (fs.existsSync(wholepath)) {
 		return true;
 	}else{
 		return false;
 	};
 };
+
+if(!exists(param.link.users, '')){
+	makeDir(param.link.users).then(path => {
+		console.log('Mappen users skapades');
+	});
+};
+
 // Datum funktion
 function addzero(number){if(number <= 9){return "0" + number;}else{return number;};};
 function getDate(dateannan, timeannan, milisecsave){
@@ -113,7 +117,6 @@ function htmldatumlist(projektdatum, todayfilename){
 };
 function htmlprojektselect(projekt, historyprojekt){
 	var tohtml = '';
-	console.log(historyprojekt)
 	if(activevar(projekt)){
 		for (var i =  projekt.length - 1; i >= 0; i--) {
 			if(historyprojekt == projekt[i]){
@@ -174,16 +177,37 @@ function htmltidloggningar(loggningar){
 	return tohtml;
 };
 function htmlprojektnamn(url, projektnamn){
-	if(!url || !projektnamn){
+	if(!url || !projektnamn || projektnamn == 'none'){
 		return '';
 	}else{
-		var spliturl = url.split('/');
-		if(spliturl[spliturl.length - 1] == 'login.html'){
+		var spliturl = url.split('\\');
+		var prittyurl = spliturl[spliturl.length - 1];
+		if(prittyurl == 'login.html' || prittyurl == 'rapport.html'){
 			return '';
 		}else{
 			return projektnamn;
 		};
 	};
+};
+function rapporttohtml(rapport){
+	var printcheckboxes = '<div id="printcheckboxes">';
+	var skrivutdatum = '<select id="skrivutdatum">';
+	var idexofdates = [];
+	if(!rapport){return false;}else{
+		for (var i = rapport.length - 1; i >= 0; i--) {
+			var printcheckboxes = printcheckboxes + '<span class="checkboxwrapper"><input type="checkbox" data-namn="' + rapport[i].namn + '" checked><lable>' + rapport[i].namn + '</lable></span>';
+			for (var a = rapport[i].datum.length - 1; a >= 0; a--) {
+				var prittydate = rapport[i].datum[a].replace('.json', '');
+				if(idexofdates.indexOf(prittydate) == -1){
+					idexofdates.push(prittydate);
+					var skrivutdatum = skrivutdatum + '<option value="' + prittydate + '">' + prittydate + '</option>';
+				};
+			};
+		};
+	};
+	var printcheckboxes = printcheckboxes + '</div><br>';
+	var skrivutdatum = skrivutdatum + '</select><br>';
+	return printcheckboxes + skrivutdatum;
 };
 
 //Mall kod
@@ -195,6 +219,7 @@ app.engine('html', function (filePath, options, callback) {
 	var startstoptime = htmlstartstoptime(options.inklockad, options.starttime, options.stoptime);
 	var greeting = valkommenhtml(options.namn);
 	var projektnamn = htmlprojektnamn(filePath, options.projektnamn);
+	var rapport = rapporttohtml(options.rapport);
 
 	// Döljer eller visar kod som skickas till server i url
 	if(!param.hidelink){var hidelinkscript = '';}else{var hidelinkscript = '<script type="text/javascript">history.pushState(null, \'\', location.href.split(\'?\')[0]);</script>';};
@@ -211,42 +236,11 @@ app.engine('html', function (filePath, options, callback) {
     	.replace('#timecount#', startstoptime.timecount)
     	.replace('#projektdatum#', projektdatum)
     	.replace('#tidloggningar#', tidloggningar)
+    	.replace('#rapport#', rapport)
     return callback(null, rendered)
   })
 }).set('views', './views').set('view engine', 'html').use(express.static('public'))
 
-var users = [];
-function searchusers(){
-	var findusers = fs.readdirSync(param.link.users);
-	if(findusers.length == 0){
-		makeDir(param.link.users + 'test' + param.splacertoken + 'Test Testsson/').then(path => {
-			console.log('Test Testsson lades till.');
-			searchusers();
-		});
-	}else{
-		var usersnum = findusers.indexOf('.DS_Store');
-		if(usersnum == '-1'){}else{
-			findusers.splice(usersnum, 1);
-		};
-		for (var i = findusers.length - 1; i >= 0; i--) {
-			var projects = fs.readdirSync(param.link.users + findusers[i] + '/');
-			var projectsnum = projects.indexOf('.DS_Store');
-			if(projectsnum == '-1'){}else{
-				projects.splice(projectsnum, 1);
-			};
-			var usersplit = findusers[i].split(param.splacertoken);
-			users.push({vgrid: usersplit[0], namn: usersplit[1], projekt: projects});
-		};
-	};
-};
-if(!exists(param.link.users, '/')){
-	makeDir(param.link.users).then(path => {
-		console.log('Mappen users skapades');
-		searchusers();
-	});
-}else{
-	searchusers();
-};
 
 
 function addutklock(vgrid, namn, projektnamn, millisec){
@@ -279,14 +273,187 @@ function addinklock(vgrid, namn, projektnamn, millisec){
 	fs.writeFileSync(mapp + dobj.manad + '.json', JSON.stringify(data, null, ' '))
 };
 
+// https://api.dryg.net/dagar/v2.1/2018/2
+// Läser in vilka dagar man kan räkna med
+
+
+
+
+
+//Skapr fil
+app.get('/download*', function (req, res) {
+	var anv = req.query.anv;
+	var datum = req.query.datum.split('-');
+	var projekt = req.query.projektnamn.split('||||');
+//console.log(projekt);
+	var ar = 2018;
+	var manad = 3;
+	var rodadatum = JSON.parse(request('GET', 'https://api.dryg.net/dagar/v2.1/' + datum[0] + '/' + datum[1]).getBody('utf8'));
+	var datumtouse = [];
+	for (var i = rodadatum.dagar.length - 1; i >= 0; i--) {
+		if(rodadatum.dagar[i]['arbetsfri dag'] == 'Nej' && rodadatum.dagar[i]['röd dag'] == 'Nej'){
+			datumtouse.push(rodadatum.dagar[i].datum);
+		};
+	};
+	//Kontrollerar hur många dagar som kan användas, där inget OB finns..
+	var tidsomkanreggas = datumtouse.length * 8;
+
+	var allaanv = fs.readdirSync(param.link.users);
+	var anvandare = '';
+	for (var i = allaanv.length - 1; i >= 0; i--) {
+		if(allaanv[i].split(param.splacertoken)[0] == anv){
+			anvandare = allaanv[i];
+			break;
+		};
+	};
+//	console.log(anvandare);
+	if(!anvandare){
+		console.log('Användare kunde inte hittas..');
+	}else{
+		var summa = 0;
+		for (var i = projekt.length - 1; i >= 0; i--) {
+			var filelink = param.link.users + anvandare + '/' + projekt[i] + '/' + datum.join('-') + '.json';
+			if(exists(filelink, '')){
+				var data = JSON.parse(fs.readFileSync(filelink, 'utf8'));
+				if(!data){}else{
+					for (var a = data.length - 1; a >= 0; a--) {
+						var summa = summa + (parseInt(data[a].ut) - parseInt(data[a].in));
+					};
+				};
+			};
+		};
+		var alltid = timebetween('', '', summa);
+		console.log(summa);
+		console.log(alltid);
+	};
+	/*request({
+	    url: 'https://api.dryg.net/dagar/v2.1/' + ar + '/' + manad,
+	    json: true
+	}, function (error, response, body) {
+		if (!error && response.statusCode === 200) {
+			// You can define styles as json object 
+			// More info: https://github.com/protobi/js-xlsx#cell-styles 
+			const styles = {
+			  headerDark: {
+			    fill: {
+			      fgColor: {
+			        rgb: 'FF000000'
+			      }
+			    },
+			    font: {
+			      color: {
+			        rgb: 'FFFFFFFF'
+			      },
+			      sz: 14,
+			      bold: true,
+			      underline: true
+			    }
+			  },
+			  cellPink: {
+			    fill: {
+			      fgColor: {
+			        rgb: 'FFFFCCFF'
+			      }
+			    }
+			  },
+			  cellGreen: {
+			    fill: {
+			      fgColor: {
+			        rgb: 'FF00FF00'
+			      }
+			    }
+			  }
+			};
+			 
+			//Array of objects representing heading rows (very top) 
+			const heading = [
+			  [{value: 'Tidrapport för: ' + datum, style: styles.headerDark}, {value: 'b1', style: styles.headerDark}, {value: 'c1', style: styles.headerDark}],
+			  ['a2', 'b2', 'c2'] // <-- It can be only values 
+			];
+			 
+			//Here you specify the export structure 
+			const specification = {
+			  customer_name: { // <- the key should match the actual data key 
+			    displayName: 'Customer', // <- Here you specify the column header 
+			    headerStyle: styles.headerDark, // <- Header style 
+			    cellStyle: function(value, row) { // <- style renderer function 
+			      // if the status is 1 then color in green else color in red 
+			      // Notice how we use another cell value to style the current one 
+			      return (row.status_id == 1) ? styles.cellGreen : {fill: {fgColor: {rgb: 'FFFF0000'}}}; // <- Inline cell style is possible  
+			    },
+			    width: 120 // <- width in pixels 
+			  },
+			  status_id: {
+			    displayName: 'Status',
+			    headerStyle: styles.headerDark,
+			    cellFormat: function(value, row) { // <- Renderer function, you can access also any row.property 
+			      return (value == 1) ? 'Active' : 'Inactive';
+			    },
+			    width: '10' // <- width in chars (when the number is passed as string) 
+			  },
+			  note: {
+			    displayName: 'Description',
+			    headerStyle: styles.headerDark,
+			    cellStyle: styles.cellPink, // <- Cell style 
+			    width: 220 // <- width in pixels 
+			  }
+			}
+			 
+			// The data set should have the following shape (Array of Objects) 
+			// The order of the keys is irrelevant, it is also irrelevant if the 
+			// dataset contains more fields as the report is build based on the 
+			// specification provided above. But you should have all the fields 
+			// that are listed in the report specification 
+			const dataset = [
+			  {customer_name: 'IBM', status_id: 1, note: 'some note', misc: 'not shown'},
+			  {customer_name: 'HP', status_id: 0, note: 'some note'},
+			  {customer_name: 'MS', status_id: 0, note: 'some note', misc: 'not shown'}
+			]
+			 
+			// Define an array of merges. 1-1 = A:1 
+			// The merges are independent of the data. 
+			// A merge will overwrite all data _not_ in the top-left cell. 
+			const merges = [
+			  { start: { row: 1, column: 1 }, end: { row: 1, column: 10 } },
+			  { start: { row: 2, column: 1 }, end: { row: 2, column: 5 } },
+			  { start: { row: 2, column: 6 }, end: { row: 2, column: 10 } }
+			]
+			 
+			// Create the excel report. 
+			// This function will return Buffer 
+			const report = excel.buildExport(
+			  [ // <- Notice that this is an array. Pass multiple sheets to create multi sheet report 
+			    {
+			      name: 'Tidbok + ' + datum, // <- Specify sheet name (optional) 
+			      heading: heading, // <- Raw heading array (optional) 
+			      merges: merges, // <- Merge cell ranges 
+			      specification: specification, // <- Report specification 
+			      data: dataset // <-- Report data 
+			    }
+			  ]
+			);
+			 
+			// You can then return this straight 
+			res.attachment('report.xlsx'); // This is sails.js specific (in general you need to set headers) 
+			return res.send(report);
+		};
+	});*/
+});
+
+//Laddar sidor
 app.get(['/', '/index.html'], function (req, res) {
 	var anv = req.query.anv;
+	var users = fs.readdirSync(param.link.users);
 	if(!anv || anv == '' || users.length == 0){
 		res.render('index', {"anv": "", "projekt": "", "projektnamn": ""})
 	}else{
 		for (var i = users.length - 1; i >= 0; i--) {
+			var projektmapp = fs.readdirSync(param.link.users + users[i] + '/');
+			var usersplit = users[i].split(param.splacertoken);
+			users[i] = {vgrid: usersplit[0], namn: usersplit[1], projekt: projektmapp};
 			if(users[i].vgrid == anv){
-				var mapp = param.link.users + users[i].vgrid + param.splacertoken + users[i].namn + '/' + req.query.projektnamn + '/';
+				var usermapp = param.link.users + users[i].vgrid + param.splacertoken + users[i].namn + '/';
+				var mapp =  usermapp + req.query.projektnamn + '/';
 				var vgrid = users[i].vgrid;
 				var namn = users[i].namn;
 				var projekt = users[i].projekt;
@@ -378,6 +545,13 @@ app.get(['/', '/index.html'], function (req, res) {
 							res.render(toshow, {"vgrid": vgrid, "namn": namn, "projekt": projekt, "projektnamn": projektnamn, "projektdatum": datum, "tidloggningar": loggningar, "todayfilename": todayfilename})
 						};
 					};
+				}else if(toshow == 'rapport'){
+					var allstuff = []
+					for (var i = projektmapp.length - 1; i >= 0; i--) {
+						var manader = fs.readdirSync(usermapp + projektmapp[i] + '/');
+						allstuff.push({"namn": projektmapp[i], "datum": manader});
+					};
+					res.render(toshow, {"vgrid": vgrid, "namn": namn, "projekt": projekt, "projektnamn": projektnamn, "rapport": allstuff})
 				}else{
 					res.render('index', {"vgrid": "", "namn": "", "projekt": "", "projektnamn": ""})
 				};
