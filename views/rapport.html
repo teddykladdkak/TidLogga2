@@ -14,9 +14,14 @@
 	};
 	function startprint(){
 		var anv = document.getElementById('namn').getAttribute('data-vgrid');
-		var projekt = ['Digital Whiteboard', 'MatApp'];
+		//var projekt = ['Digital Whiteboard', 'MatApp'];
+		var allcheckbox = document.getElementsByClassName('checkboxwrapper');
+		var projekt = [];
+		for (var i = allcheckbox.length - 1; i >= 0; i--) {
+			projekt.push(allcheckbox[i].getElementsByTagName('input')[0].getAttribute('data-namn'));
+		};
 		var datum = document.getElementById('skrivutdatum').value;
-		window.open('/download?anv=' + anv + '&datum=' + datum + '&projektnamn=' + projekt.join('||||'),'_self')	
+		window.open('/download?anv=' + anv + '&datum=' + datum + '&projektnamn=' + projekt.join('||||'), 'Tidrapport - ' + datum);
 	};
 </script>
 #footer#

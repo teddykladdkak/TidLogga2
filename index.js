@@ -7,7 +7,6 @@ const makeDir = require('make-dir');
 const md5 = require("apache-md5"); // Skapar lösenord
 var bodyParser = require('body-parser'); //Bilbiotek för att hantera post
 var request = require('sync-request');
-const excel = require('node-excel-export');
 
 //Parametrar till stil
 var param = {
@@ -88,6 +87,7 @@ function timebetween(start, stop, millisec){
 
 // Kollar ifall variabel innehåller värde
 function activevar(variabel){
+	//console.log(variabel)
 	if(!variabel || variabel == '' || variabel.length == 0){
 		return false;
 	}else{
@@ -168,7 +168,7 @@ function htmltidloggningar(loggningar){
 			if(activevar(loggningar[i].ut)){
 				var utdobj = getDate('', '', loggningar[i].ut);
 			}else{
-
+				var utdobj = {tid: ''};
 			};
 			var time = timebetween('', '', (loggningar[i].ut - loggningar[i].in));
 			var tohtml = tohtml + '<tr data-milisecin="' + loggningar[i].in + '" data-milisecut="' + loggningar[i].ut + '"><td>' + indobj.datum + '</td><td>' + indobj.tid + '</td><td>' + utdobj.tid + '</td><td>' + addzero(time.t) + ':' + addzero(time.m) + ':' + addzero(time.s) + '</td><td><i class="fa fa-trash fa-3x" aria-hidden="true" onclick="removesegment(this);"></i><i class="fa fa-pencil-square-o fa-3x" aria-hidden="true" onclick="showedit(this);"></i></td></tr>';
@@ -182,10 +182,14 @@ function htmlprojektnamn(url, projektnamn){
 	}else{
 		var spliturl = url.split('\\');
 		var prittyurl = spliturl[spliturl.length - 1];
-		if(prittyurl == 'login.html' || prittyurl == 'rapport.html'){
-			return '';
+		console.log(prittyurl)
+		var spliturltwo = url.split('/');
+		var prittyurltwo = spliturltwo[spliturltwo.length - 1];
+		console.log(prittyurltwo)
+		if(prittyurl == 'login.html' || prittyurl == 'rapport.html' || prittyurltwo == 'login.html' || prittyurltwo == 'rapport.html'){
+			return '<div id="projektnamn" class="td" data-projektnamn="' + projektnamn + '"></div>';
 		}else{
-			return projektnamn;
+			return '<div id="projektnamn" class="td" data-projektnamn="' + projektnamn + '">' + projektnamn + '</div>';
 		};
 	};
 };
@@ -225,7 +229,7 @@ app.engine('html', function (filePath, options, callback) {
 	if(!param.hidelink){var hidelinkscript = '';}else{var hidelinkscript = '<script type="text/javascript">history.pushState(null, \'\', location.href.split(\'?\')[0]);</script>';};
     var rendered = content.toString()
     	.replace('#head#', '<!DOCTYPE html><html><head><title>TidLogga</title>' + hidelinkscript + '<meta http-equiv="Content-Type" content="text/html; charset=UTF-8"><meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1"><meta content="yes" name="apple-mobile-web-app-capable"><meta content="yes" name="mobile-web-app-capable"><meta content="minimum-scale=1.0, width=device-width, maximum-scale=0.6667, user-scalable=no" name="viewport"><meta name="apple-mobile-web-app-status-bar-style" content="black"><link rel="shortcut icon" href="' + param.link.icons + 'icon.ico"><link rel="icon" type="image/vnd.microsoft.icon" href="' + param.link.icons + 'icon.ico"><link rel="icon" type="image/png" href="' + param.link.icons + 'icon196x196.png"><link rel="apple-touch-icon-precomposed" href="' + param.link.icons + 'icon180x180.png"><link rel="apple-touch-icon-precomposed" sizes="76x76" href="' + param.link.icons + 'icon76x76.png"><link rel="apple-touch-icon-precomposed" sizes="120x120" href="' + param.link.icons + 'icon120x120.png"><link rel="apple-touch-icon-precomposed" sizes="152x152" href="' + param.link.icons + 'icon152x152.png"><link rel="stylesheet" href="' + param.link.style + 'font-awesome/css/font-awesome.css"><link rel="stylesheet" href="' + param.link.style + 'main.css"><script type="application/javascript" src="' + param.link.script + 'main.js"></script>')
-    	.replace('#header#', '</head><body><div id="wrapper"><div id="head">TidLogga</div><div id="header" class="table"><div class="tr"><div id="namn" class="td" data-namn="' + options.namn + '" data-vgrid="' + options.vgrid + '">' + greeting + '</div><div id="projektnamn" class="td" data-projektnamn="' + projektnamn + '">' + projektnamn + '</div></div></div>')
+    	.replace('#header#', '</head><body><div id="wrapper"><div id="head">TidLogga</div><div id="header" class="table"><div class="tr"><div id="namn" class="td" data-namn="' + options.namn + '" data-vgrid="' + options.vgrid + '">' + greeting + '</div>' + projektnamn + '</div></div>')
     	.replace('#footer#', '</div><div id="footer">2018&nbsp;©&nbsp;Mattias Lidbeck&nbsp;¦&nbsp;{<a href="https://www.teddyprojekt.tk/" alt="Länk till denna sida" onclick="internlink(this, event);">www.teddyprojekt.tk</a>}</div></body></html>')
     	.replace('#projektselect#', projektselect)
     	.replace('#klockbuttons#', startstoptime.main)
@@ -246,6 +250,9 @@ app.engine('html', function (filePath, options, callback) {
 function addutklock(vgrid, namn, projektnamn, millisec){
 	var mapp = param.link.users + vgrid + param.splacertoken + namn + '/' + projektnamn + '/';
 	var projekttider = fs.readdirSync(mapp);
+		if(projekttider.indexOf('.DS_Store') == -1){}else{
+	    	projekttider.splice(projekttider.indexOf('.DS_Store'), 1);
+	    };
 	if(projekttider.length == 0){}else{
 		for (var a = projekttider.length - 1; a >= 0; a--) {
 			var data = JSON.parse(fs.readFileSync(mapp + projekttider[a], 'utf8'));
@@ -276,7 +283,7 @@ function addinklock(vgrid, namn, projektnamn, millisec){
 // https://api.dryg.net/dagar/v2.1/2018/2
 // Läser in vilka dagar man kan räkna med
 
-
+var manader = ['Januari', 'Februari', 'Mars', 'April', 'Maj', 'Juni', 'Juli', 'Augusti', 'September', 'Oktober', 'Noveber', 'December'];
 
 
 
@@ -285,170 +292,85 @@ app.get('/download*', function (req, res) {
 	var anv = req.query.anv;
 	var datum = req.query.datum.split('-');
 	var projekt = req.query.projektnamn.split('||||');
-//console.log(projekt);
-	var ar = 2018;
-	var manad = 3;
 	var rodadatum = JSON.parse(request('GET', 'https://api.dryg.net/dagar/v2.1/' + datum[0] + '/' + datum[1]).getBody('utf8'));
 	var datumtouse = [];
-	for (var i = rodadatum.dagar.length - 1; i >= 0; i--) {
+	for (var i = 0; i < rodadatum.dagar.length; i++){
 		if(rodadatum.dagar[i]['arbetsfri dag'] == 'Nej' && rodadatum.dagar[i]['röd dag'] == 'Nej'){
 			datumtouse.push(rodadatum.dagar[i].datum);
 		};
 	};
-	//Kontrollerar hur många dagar som kan användas, där inget OB finns..
 	var tidsomkanreggas = datumtouse.length * 8;
 
 	var allaanv = fs.readdirSync(param.link.users);
+		if(allaanv.indexOf('.DS_Store') == -1){}else{
+	    	allaanv.splice(allaanv.indexOf('.DS_Store'), 1);
+	    };
 	var anvandare = '';
-	for (var i = allaanv.length - 1; i >= 0; i--) {
+	for (var i = 0; i < allaanv.length; i++){
 		if(allaanv[i].split(param.splacertoken)[0] == anv){
 			anvandare = allaanv[i];
 			break;
 		};
 	};
-//	console.log(anvandare);
 	if(!anvandare){
 		console.log('Användare kunde inte hittas..');
 	}else{
 		var summa = 0;
-		for (var i = projekt.length - 1; i >= 0; i--) {
+		for (var i = 0; i < projekt.length; i++){
 			var filelink = param.link.users + anvandare + '/' + projekt[i] + '/' + datum.join('-') + '.json';
+			console.log('Kollar om projekt existerar: ' + exists(filelink, ''))
 			if(exists(filelink, '')){
 				var data = JSON.parse(fs.readFileSync(filelink, 'utf8'));
 				if(!data){}else{
-					for (var a = data.length - 1; a >= 0; a--) {
+					for (var a = 0; a < data.length; a++){
 						var summa = summa + (parseInt(data[a].ut) - parseInt(data[a].in));
 					};
 				};
 			};
 		};
 		var alltid = timebetween('', '', summa);
-		console.log(summa);
-		console.log(alltid);
 	};
-	/*request({
-	    url: 'https://api.dryg.net/dagar/v2.1/' + ar + '/' + manad,
-	    json: true
-	}, function (error, response, body) {
-		if (!error && response.statusCode === 200) {
-			// You can define styles as json object 
-			// More info: https://github.com/protobi/js-xlsx#cell-styles 
-			const styles = {
-			  headerDark: {
-			    fill: {
-			      fgColor: {
-			        rgb: 'FF000000'
-			      }
-			    },
-			    font: {
-			      color: {
-			        rgb: 'FFFFFFFF'
-			      },
-			      sz: 14,
-			      bold: true,
-			      underline: true
-			    }
-			  },
-			  cellPink: {
-			    fill: {
-			      fgColor: {
-			        rgb: 'FFFFCCFF'
-			      }
-			    }
-			  },
-			  cellGreen: {
-			    fill: {
-			      fgColor: {
-			        rgb: 'FF00FF00'
-			      }
-			    }
-			  }
-			};
-			 
-			//Array of objects representing heading rows (very top) 
-			const heading = [
-			  [{value: 'Tidrapport för: ' + datum, style: styles.headerDark}, {value: 'b1', style: styles.headerDark}, {value: 'c1', style: styles.headerDark}],
-			  ['a2', 'b2', 'c2'] // <-- It can be only values 
-			];
-			 
-			//Here you specify the export structure 
-			const specification = {
-			  customer_name: { // <- the key should match the actual data key 
-			    displayName: 'Customer', // <- Here you specify the column header 
-			    headerStyle: styles.headerDark, // <- Header style 
-			    cellStyle: function(value, row) { // <- style renderer function 
-			      // if the status is 1 then color in green else color in red 
-			      // Notice how we use another cell value to style the current one 
-			      return (row.status_id == 1) ? styles.cellGreen : {fill: {fgColor: {rgb: 'FFFF0000'}}}; // <- Inline cell style is possible  
-			    },
-			    width: 120 // <- width in pixels 
-			  },
-			  status_id: {
-			    displayName: 'Status',
-			    headerStyle: styles.headerDark,
-			    cellFormat: function(value, row) { // <- Renderer function, you can access also any row.property 
-			      return (value == 1) ? 'Active' : 'Inactive';
-			    },
-			    width: '10' // <- width in chars (when the number is passed as string) 
-			  },
-			  note: {
-			    displayName: 'Description',
-			    headerStyle: styles.headerDark,
-			    cellStyle: styles.cellPink, // <- Cell style 
-			    width: 220 // <- width in pixels 
-			  }
-			}
-			 
-			// The data set should have the following shape (Array of Objects) 
-			// The order of the keys is irrelevant, it is also irrelevant if the 
-			// dataset contains more fields as the report is build based on the 
-			// specification provided above. But you should have all the fields 
-			// that are listed in the report specification 
-			const dataset = [
-			  {customer_name: 'IBM', status_id: 1, note: 'some note', misc: 'not shown'},
-			  {customer_name: 'HP', status_id: 0, note: 'some note'},
-			  {customer_name: 'MS', status_id: 0, note: 'some note', misc: 'not shown'}
-			]
-			 
-			// Define an array of merges. 1-1 = A:1 
-			// The merges are independent of the data. 
-			// A merge will overwrite all data _not_ in the top-left cell. 
-			const merges = [
-			  { start: { row: 1, column: 1 }, end: { row: 1, column: 10 } },
-			  { start: { row: 2, column: 1 }, end: { row: 2, column: 5 } },
-			  { start: { row: 2, column: 6 }, end: { row: 2, column: 10 } }
-			]
-			 
-			// Create the excel report. 
-			// This function will return Buffer 
-			const report = excel.buildExport(
-			  [ // <- Notice that this is an array. Pass multiple sheets to create multi sheet report 
-			    {
-			      name: 'Tidbok + ' + datum, // <- Specify sheet name (optional) 
-			      heading: heading, // <- Raw heading array (optional) 
-			      merges: merges, // <- Merge cell ranges 
-			      specification: specification, // <- Report specification 
-			      data: dataset // <-- Report data 
-			    }
-			  ]
-			);
-			 
-			// You can then return this straight 
-			res.attachment('report.xlsx'); // This is sails.js specific (in general you need to set headers) 
-			return res.send(report);
-		};
-	});*/
+	var fileparam = {
+		telefon: 'XXXX-XXXXXX',
+		namnchef: 'XXXX XXXXXXX',
+		titel: 'XXXXXXX',
+		personnr: 'XXXXXX-XXXX',
+		namn: anvandare.split('#')[1],
+		ansvar: 'XXXXXX'
+	};
+	var timetoday = (parseInt(alltid.t) / 8).toString().split('.');
+	var hoursleft = alltid.t - (timetoday[0] * 8);
+	var minutertilltimme = Math.ceil(((alltid.m / 60) * 10)) / 10;
+	var htmlhead = '<!DOCTYPE html> <html> <head> <title>Tidrapport - ' + manader[parseInt(datum[1])] + ' ' + datum[0] + '</title> <style type="text/css"> h1{font-size: 20px; margin: 3px;} p{font-size: 15px; margin: 3px;} table#header{margin-bottom: 30px; } table#header, #header tr{width: 100%; } td{border: solid 1px #000; } table, tr{border-collapse: collapse; } </style> </head> <body>';
+	var htmlheader = '<table id="header"><tr><td colspan="4"><h1>Tjänstgöringsrapport timavlönad Sahlgrenska Universitetssjukhuset</h1></td></tr><tr><td><p>Anställd:<br/>' + fileparam.namn + '</p></td><td><p>Pers nr:<br/>' + fileparam.personnr + '</p></td><td><p>Titel:<br/>' + fileparam.titel + '</p></td><td><p>Ansvarsenhet:<br/>' + fileparam.ansvar + '</p></td></tr><tr><td colspan="4"><p>Attesterande chef:<br/><br/></p></td></tr><tr><td colspan="4"><p>Namnförtydligande: ' + fileparam.namnchef + '</p></td></tr><tr><td colspan="4"><p>Telefon: ' + fileparam.telefon + '</p></td></tr></table>';
+	var htmlrapport = '<table><tr><td colspan="3">Månad: ' + manader[parseInt(datum[1])] + ' ' + datum[0] + '</td></tr><tr><td>Datum</td><td>Arbetat tid</td><td>Timmar</td></tr>';
+	var htmlrapportbody = '';
+	var datenumber = 0;
+	for (var i = 0; i < timetoday[0]; i++){
+		var datenumber = i;
+		var htmlrapportbody = htmlrapportbody + '<tr style="text-align: center;"><td>' + datumtouse[i] + '</td><td>8:00-16:45</td><td>8</td></tr>';
+	}
+	var htmlrapportbody = htmlrapportbody + '<tr style="text-align: center;"><td>' + datumtouse[datenumber + 1] + '</td><td>8:00-8:' + addzero(alltid.m) + '</td><td>' + minutertilltimme + '</td></tr>';
+	var htmlrapport = htmlrapport + htmlrapportbody + '<tr><td colspan="2">Summa:</td><td style="text-align: center;">' + (alltid.t + minutertilltimme) + '</td></tr></table>';
+	var htmlend = '</body></html>'
+	res.send(htmlhead + htmlheader + htmlrapport + htmlend)
 });
 
 //Laddar sidor
 app.get(['/', '/index.html'], function (req, res) {
 	var anv = req.query.anv;
 	var users = fs.readdirSync(param.link.users);
+		if(users.indexOf('.DS_Store') == -1){}else{
+	    	users.splice(users.indexOf('.DS_Store'), 1);
+	    };
 	if(!anv || anv == '' || users.length == 0){
 		res.render('index', {"anv": "", "projekt": "", "projektnamn": ""})
 	}else{
 		for (var i = users.length - 1; i >= 0; i--) {
 			var projektmapp = fs.readdirSync(param.link.users + users[i] + '/');
+				if(projektmapp.indexOf('.DS_Store') == -1){}else{
+			    	projektmapp.splice(projektmapp.indexOf('.DS_Store'), 1);
+			    };
 			var usersplit = users[i].split(param.splacertoken);
 			users[i] = {vgrid: usersplit[0], namn: usersplit[1], projekt: projektmapp};
 			if(users[i].vgrid == anv){
@@ -476,6 +398,9 @@ app.get(['/', '/index.html'], function (req, res) {
 						var sendstoptime = stoptime;
 					};
 					var projekttider = fs.readdirSync(mapp);
+						if(projekttider.indexOf('.DS_Store') == -1){}else{
+					    	projekttider.splice(projekttider.indexOf('.DS_Store'), 1);
+					    };
 					var inklockad = false;
 					if(projekttider.length == 0){}else{
 						for (var a = projekttider.length - 1; a >= 0; a--) {
@@ -500,9 +425,7 @@ app.get(['/', '/index.html'], function (req, res) {
 					res.render(req.query.toshow, {"vgrid": vgrid, "namn": namn, "projekt": projekt, "projektnamn": projektnamn, "starttime": sendstarttime, "stoptime": sendstoptime, "inklockad": inklockad})
 				}else if(toshow == 'logg'){
 					if(!req.query.remove){}else{
-						console.log(req.query.remove);
 						var remove = JSON.parse(req.query.remove);
-						console.log(remove.in + ' -- ' + remove.ut);
 						var findloggning = JSON.parse(fs.readFileSync(mapp + datetofetch + '.json', 'utf8'));
 						for (var c = findloggning.length - 1; c >= 0; c--) {
 							if(remove.in == findloggning[c].in){
@@ -512,7 +435,6 @@ app.get(['/', '/index.html'], function (req, res) {
 								};
 							};
 						};
-						console.log(findloggning);
 						if(findloggning.length == 0){
 							fs.unlinkSync(mapp + datetofetch + '.json');
 						}else{
@@ -529,6 +451,9 @@ app.get(['/', '/index.html'], function (req, res) {
 						};
 					};
 					var datum = fs.readdirSync(mapp);
+						if(datum.indexOf('.DS_Store') == -1){}else{
+					    	datum.splice(datum.indexOf('.DS_Store'), 1);
+					    };
 					if(datum.length == 0){
 						res.render('login', {"vgrid": vgrid, "namn": namn, "projekt": projekt, "projektnamn": projektnamn})
 					}else{
@@ -549,6 +474,9 @@ app.get(['/', '/index.html'], function (req, res) {
 					var allstuff = []
 					for (var i = projektmapp.length - 1; i >= 0; i--) {
 						var manader = fs.readdirSync(usermapp + projektmapp[i] + '/');
+							if(manader.indexOf('.DS_Store') == -1){}else{
+						    	manader.splice(manader.indexOf('.DS_Store'), 1);
+						    };
 						allstuff.push({"namn": projektmapp[i], "datum": manader});
 					};
 					res.render(toshow, {"vgrid": vgrid, "namn": namn, "projekt": projekt, "projektnamn": projektnamn, "rapport": allstuff})
