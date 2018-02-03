@@ -115,7 +115,8 @@ function htmldatumlist(projektdatum, todayfilename){
 	};
 	return tohtml;
 };
-function htmlprojektselect(projekt, historyprojekt){
+function htmlprojektselect(projekt, historyprojekt, namn, vgrid){
+	var usermapp = param.link.users + vgrid + param.splacertoken + namn + '/';
 	var tohtml = '';
 	if(activevar(projekt)){
 		for (var i =  projekt.length - 1; i >= 0; i--) {
@@ -124,7 +125,13 @@ function htmlprojektselect(projekt, historyprojekt){
 			}else{
 				var selected = '';
 			};
-			var tohtml = tohtml + '<option value="' +  projekt[i] + '"' + selected + '>' +  projekt[i] + '</option>';
+			var mapp =  usermapp + projekt[i] + '/';
+			if(checkinklock(mapp)){
+				var active = '*';
+			}else{
+				var active = '';
+			};
+			var tohtml = tohtml + '<option value="' + projekt[i] + '"' + selected + '>' + active +  projekt[i] + '</option>';
 		};
 	};
 	return tohtml;
@@ -178,7 +185,7 @@ function htmltidloggningar(loggningar){
 };
 function htmlprojektnamn(url, projektnamn){
 	if(!url || !projektnamn || projektnamn == 'none'){
-		return '';
+		return '<div id="projektnamn" class="td" data-projektnamn="' + projektnamn + '"></div>';
 	}else{
 		var spliturl = url.split('\\');
 		var prittyurl = spliturl[spliturl.length - 1];
@@ -219,7 +226,7 @@ app.engine('html', function (filePath, options, callback) {
   fs.readFile(filePath, function (err, content) {
   	var projektdatum = htmldatumlist(options.projektdatum, options.todayfilename);
   	var tidloggningar = htmltidloggningar(options.tidloggningar);
-  	var projektselect = htmlprojektselect(options.projekt, options.projektnamn);
+  	var projektselect = htmlprojektselect(options.projekt, options.projektnamn, options.namn, options.vgrid);
 	var startstoptime = htmlstartstoptime(options.inklockad, options.starttime, options.stoptime);
 	var greeting = valkommenhtml(options.namn);
 	var projektnamn = htmlprojektnamn(filePath, options.projektnamn);
@@ -280,18 +287,150 @@ function addinklock(vgrid, namn, projektnamn, millisec){
 	fs.writeFileSync(mapp + dobj.manad + '.json', JSON.stringify(data, null, ' '))
 };
 
+function checkinklock(mapp){
+	var projekttider = fs.readdirSync(mapp);
+		if(projekttider.indexOf('.DS_Store') == -1){}else{
+	    	projekttider.splice(projekttider.indexOf('.DS_Store'), 1);
+	    };
+	var inklockad = false;
+	if(projekttider.length == 0){}else{
+		for (var a = projekttider.length - 1; a >= 0; a--) {
+			var data = JSON.parse(fs.readFileSync(mapp + projekttider[a], 'utf8'));
+			for (var b = data.length - 1; b >= 0; b--) {
+				if(data[b].ut == ''){
+					inklockad = data[b].in;
+				};
+			};
+		};
+	};
+	return inklockad;
+};
+
 // https://api.dryg.net/dagar/v2.1/2018/2
 // Läser in vilka dagar man kan räkna med
-
 var manader = ['Januari', 'Februari', 'Mars', 'April', 'Maj', 'Juni', 'Juli', 'Augusti', 'September', 'Oktober', 'Noveber', 'December'];
-
-
-
 //Skapr fil
 app.get('/download*', function (req, res) {
 	var anv = req.query.anv;
 	var datum = req.query.datum.split('-');
-	var projekt = req.query.projektnamn.split('||||');
+	var layout = req.query.layout;
+	var projektnamn = req.query.projektnamn.split('||||');
+	if(layout == "vgrutanob"){
+		var html = makerapportutanob(anv, datum, projektnamn);
+	}else{
+		//json rapport
+		var html = makerapport(layout, anv, datum, projektnamn);
+	};
+	
+	res.send(html)
+});
+
+function makerapport(layout, anv, datum, projekt){
+	var allaanv = fs.readdirSync(param.link.users);
+		if(allaanv.indexOf('.DS_Store') == -1){}else{
+	    	allaanv.splice(allaanv.indexOf('.DS_Store'), 1);
+	    };
+	var anvandare = '';
+	for (var i = 0; i < allaanv.length; i++){
+		if(allaanv[i].split(param.splacertoken)[0] == anv){
+			anvandare = allaanv[i];
+			break;
+		};
+	};
+	if(!anvandare){
+		console.log('Användare kunde inte hittas..');
+	}else{
+		var loggningar = [];
+		for (var i = 0; i < projekt.length; i++){
+			var filelink = param.link.users + anvandare + '/' + projekt[i] + '/' + datum.join('-') + '.json';
+			if(exists(filelink, '')){
+				//Varje projekt
+				var datearray = [];
+				var data = JSON.parse(fs.readFileSync(filelink, 'utf8'));
+				if(!data){}else{
+					for (var a = 0; a < data.length; a++){
+						if(data[a].ut == ''){}else{
+							var datut = getDate('', '', data[a].ut);
+							var datin = getDate('', '', data[a].in);
+							var mellan = parseInt(data[a].ut) - parseInt(data[a].in);
+							var datatopush = {"tidin": datin.tid, "tidut": datut.tid, "mellan": mellan};
+						};
+						var finnsredan = false;
+						var nummer = 0;
+						for (var b = datearray.length - 1; b >= 0; b--) {
+							if(datearray[b].datum == datin.datum){
+								var finnsredan = true;
+								var nummer = b;
+							};
+						};
+						if(finnsredan){
+							datearray[nummer].sammanlagdtid = parseInt(datearray[nummer].sammanlagdtid) + (parseInt(data[a].ut) - parseInt(data[a].in));
+							datearray[nummer].loggningar.push(datatopush)
+						}else{
+							datearray.push({"datum": datin.datum, "sammanlagdtid": (parseInt(data[a].ut) - parseInt(data[a].in)), "loggningar": [datatopush]})
+						};
+					};
+				};
+				//Räkna ut sammanlagd summa för projeket
+				var projektsumma = 0;
+				for (var a = datearray.length - 1; a >= 0; a--) {
+					var projektsumma = projektsumma + datearray[a].sammanlagdtid;
+				};
+				loggningar.push({"projektnamn": projekt[i], "sammanlagdtid": projektsumma, "instamplingar": datearray});
+			};
+		};
+	};
+	if(layout == 'json'){return loggningar;};
+	var htmltosend = '<!DOCTYPE html> <html> <head> <title>Tidrapport för ' + datum.join('-') + '</title> <style type="text/css"> #dontprint{ zoom: 1.5; } table, tr{width: 100%; border-collapse: collapse; } td, th{border: solid 1px #000; text-align: center;} thead tr th, .head{font-weight: bold; border-bottom: solid 2px #000; text-align: left;} thead tr th:first-child, .head{border-right: solid 2px #000; } .wrapperhead{ border-top: solid 2px #000; } @media print { #dontprint, #info{ display: none; } } </style> </head> <body>';
+	var htmltosend = htmltosend + '<input type="button" value="Skriv ut" onclick="window.print();" id="dontprint"><h1>Tidrapport för ' + datum.join('-') + '</h1><h2>' + anvandare.split(param.splacertoken)[1] + '</h2><table>';
+	var htmltosend = htmltosend + '<thead><tr><th>Projekt</th><th>Datum</th><th>Start</th><th>Slut</th><th>Sammanlagt Dag</th><th>Sammanlagt projekt</th><th>Sammanlagt månad</th></tr></thead>';
+	var htmltosend = htmltosend + '<tbody>';
+	var tablehtml = '';
+	var alllines = 0;
+	var sammanmanad = 0;
+	for (var i = 0; i < loggningar.length; i++){
+		var rowspanprojekt = 0;
+		var projekthtml = '';
+		var projekthtml = projekthtml + '<tr class="wrapperhead"><td#rowspanprojekt# class="head">' + loggningar[i].projektnamn + '</td>';
+		var sammanprojekt = 0;
+		for (var a = 0; a < loggningar[i].instamplingar.length; a++){
+			var datumhtml = '';
+			var datumhtml = datumhtml + '<td#rowspandag#>' + loggningar[i].instamplingar[a].datum + '</td>';
+			var rowspandag = 0;
+			var sammandagrak = 0;
+			for (var b = 0; b < loggningar[i].instamplingar[a].loggningar.length; b++){
+				rowspanprojekt++;
+				rowspandag++;
+				alllines++;
+				var tidobjc = loggningar[i].instamplingar[a].loggningar[b];
+				var sammandagrak = sammandagrak + tidobjc.mellan;
+				var sammanprojekt = sammanprojekt + tidobjc.mellan;
+				var sammanmanad = sammanmanad + tidobjc.mellan;
+				if(b == 0){
+					var datumhtml = datumhtml + '<td>' + tidobjc.tidin + '</td><td>' + tidobjc.tidut + '</td><td#rowspandag#>#sammandag#</td>';
+				}else{
+					var datumhtml = datumhtml + '<td>' + tidobjc.tidin + '</td><td>' + tidobjc.tidut + '</td></tr>';
+				};
+				if(b == 0 && a == 0){
+					var datumhtml = datumhtml + '<td#rowspanprojekt#>#sammanprojekt#</td>';
+				};
+				if(b== 0 && a == 0 && i == 0){
+					var datumhtml = datumhtml + '#sammanmanad#</tr>';
+				};
+			};
+			var sammandagrakobj = timebetween('', '', sammandagrak);
+			var projekthtml = projekthtml + datumhtml.replace(/#rowspandag#/g, ' rowspan="' + rowspandag + '"').replace(/#sammandag#/g, addzero(sammandagrakobj.t) + ':' + addzero(sammandagrakobj.m) + ':' + addzero(sammandagrakobj.s));
+		};
+		var sammanprojektobj = timebetween('', '', sammanprojekt);
+		var tablehtml = tablehtml + projekthtml.replace(/#rowspanprojekt#/g, ' rowspan="' + rowspanprojekt + '"').replace(/#sammanprojekt#/g, addzero(sammanprojektobj.t) + ':' + addzero(sammanprojektobj.m) + ':' + addzero(sammanprojektobj.s));
+			
+	};
+	var sammanmanadobj = timebetween('', '', sammanmanad);
+	var lasttablehtml = tablehtml.replace(/#sammanmanad#/g, '<td rowspan="' + alllines + '">' + addzero(sammanmanadobj.t) + ':' + addzero(sammanmanadobj.m) + ':' + addzero(sammanmanadobj.s) + '</td>');
+	var htmltosend = htmltosend + lasttablehtml + '</tbody></table></body></html>'
+	return htmltosend;
+};
+function makerapportutanob(anv, datum, projekt){
 	var rodadatum = JSON.parse(request('GET', 'https://api.dryg.net/dagar/v2.1/' + datum[0] + '/' + datum[1]).getBody('utf8'));
 	var datumtouse = [];
 	for (var i = 0; i < rodadatum.dagar.length; i++){
@@ -300,7 +439,6 @@ app.get('/download*', function (req, res) {
 		};
 	};
 	var tidsomkanreggas = datumtouse.length * 8;
-
 	var allaanv = fs.readdirSync(param.link.users);
 		if(allaanv.indexOf('.DS_Store') == -1){}else{
 	    	allaanv.splice(allaanv.indexOf('.DS_Store'), 1);
@@ -318,43 +456,38 @@ app.get('/download*', function (req, res) {
 		var summa = 0;
 		for (var i = 0; i < projekt.length; i++){
 			var filelink = param.link.users + anvandare + '/' + projekt[i] + '/' + datum.join('-') + '.json';
-			console.log('Kollar om projekt existerar: ' + exists(filelink, ''))
 			if(exists(filelink, '')){
 				var data = JSON.parse(fs.readFileSync(filelink, 'utf8'));
 				if(!data){}else{
 					for (var a = 0; a < data.length; a++){
-						var summa = summa + (parseInt(data[a].ut) - parseInt(data[a].in));
+						if(data[a].ut == ''){}else{
+							var summa = summa + (parseInt(data[a].ut) - parseInt(data[a].in));
+						};
 					};
 				};
 			};
 		};
 		var alltid = timebetween('', '', summa);
 	};
-	var fileparam = {
-		telefon: 'XXXX-XXXXXX',
-		namnchef: 'XXXX XXXXXXX',
-		titel: 'XXXXXXX',
-		personnr: 'XXXXXX-XXXX',
-		namn: anvandare.split('#')[1],
-		ansvar: 'XXXXXX'
-	};
+	var fileparam = {telefon: 'XXXX-XXXXXX', namnchef: 'XXXX XXXXXXX', titel: 'XXXXXXX', personnr: 'XXXXXX-XXXX', namn: anvandare.split(param.splacertoken)[1], ansvar: 'XXXXXX'};
 	var timetoday = (parseInt(alltid.t) / 8).toString().split('.');
 	var hoursleft = alltid.t - (timetoday[0] * 8);
 	var minutertilltimme = Math.ceil(((alltid.m / 60) * 10)) / 10;
-	var htmlhead = '<!DOCTYPE html> <html> <head> <title>Tidrapport - ' + manader[parseInt(datum[1])] + ' ' + datum[0] + '</title> <style type="text/css"> h1{font-size: 20px; margin: 3px;} p{font-size: 15px; margin: 3px;} table#header{margin-bottom: 30px; } table#header, #header tr{width: 100%; } td{border: solid 1px #000; } table, tr{border-collapse: collapse; } </style> </head> <body>';
-	var htmlheader = '<table id="header"><tr><td colspan="4"><h1>Tjänstgöringsrapport timavlönad Sahlgrenska Universitetssjukhuset</h1></td></tr><tr><td><p>Anställd:<br/>' + fileparam.namn + '</p></td><td><p>Pers nr:<br/>' + fileparam.personnr + '</p></td><td><p>Titel:<br/>' + fileparam.titel + '</p></td><td><p>Ansvarsenhet:<br/>' + fileparam.ansvar + '</p></td></tr><tr><td colspan="4"><p>Attesterande chef:<br/><br/></p></td></tr><tr><td colspan="4"><p>Namnförtydligande: ' + fileparam.namnchef + '</p></td></tr><tr><td colspan="4"><p>Telefon: ' + fileparam.telefon + '</p></td></tr></table>';
-	var htmlrapport = '<table><tr><td colspan="3">Månad: ' + manader[parseInt(datum[1])] + ' ' + datum[0] + '</td></tr><tr><td>Datum</td><td>Arbetat tid</td><td>Timmar</td></tr>';
+	var htmlhead = '<!DOCTYPE html> <html> <head> <title>Tidrapport - ' + manader[parseInt(datum[1])] + ' ' + datum[0] + '</title> <style type="text/css"> #dontprint{ zoom: 1.5; } #info{font-size: 18px; background-color: yellow; margin: 10px; padding: 5px;} .printedit{background-color: #CCC;} h1{font-size: 20px; margin: 3px;} p{font-size: 15px; margin: 3px;} table#header{margin-bottom: 30px; } table#header, #header tr{width: 100%; } td{border: solid 1px #000; } table, tr{border-collapse: collapse; } @media print { #dontprint, #info{ display: none; } } </style> </head> <body>';
+	var htmlhead = htmlhead + '<input type="button" value="Skriv ut" onclick="window.print();" id="dontprint"><div id="info">Observera att denna blanketten tar bort all OB. Den räknar ihop sammanlagd tid du registrerat under månaden. Kollar med register vilka dagar som inte är OB på och lägger in heldagar fram till att timmarna är fyllda.</div>'
+	var htmlheader = '<table id="header"><tr><td colspan="4"><h1>Tjänstgöringsrapport timavlönad Sahlgrenska Universitetssjukhuset</h1></td></tr><tr><td><p>Anställd:</p><p>' + fileparam.namn + '</p></td><td><p>Pers nr:</p><p class="printedit" contenteditable="true">' + fileparam.personnr + '</p></td><td><p>Titel:</p><p class="printedit" contenteditable="true">' + fileparam.titel + '</p></td><td><p>Ansvarsenhet:</p><p class="printedit" contenteditable="true">' + fileparam.ansvar + '</p></td></tr><tr><td colspan="4"><p>Attesterande chef:<br/><br/></p></td></tr><tr><td colspan="4"><p>Namnförtydligande: <span class="printedit" contenteditable="true">' + fileparam.namnchef + '</span></p></td></tr><tr><td colspan="4"><p>Telefon: <span class="printedit" contenteditable="true">' + fileparam.telefon + '</span></p></td></tr></table>';
+	var htmlrapport = '<table><tr><td colspan="3">Månad: ' + manader[parseInt(datum[1]) - 1] + ' ' + datum[0] + '</td></tr><tr><td>Datum</td><td>Arbetat tid</td><td>Timmar</td></tr>';
 	var htmlrapportbody = '';
 	var datenumber = 0;
 	for (var i = 0; i < timetoday[0]; i++){
 		var datenumber = i;
 		var htmlrapportbody = htmlrapportbody + '<tr style="text-align: center;"><td>' + datumtouse[i] + '</td><td>8:00-16:45</td><td>8</td></tr>';
-	}
-	var htmlrapportbody = htmlrapportbody + '<tr style="text-align: center;"><td>' + datumtouse[datenumber + 1] + '</td><td>8:00-8:' + addzero(alltid.m) + '</td><td>' + minutertilltimme + '</td></tr>';
+	};
+	var htmlrapportbody = htmlrapportbody + '<tr style="text-align: center;"><td>' + datumtouse[datenumber + 1] + '</td><td>8:00-' + addzero(hoursleft + 8) + ':' + addzero(alltid.m) + '</td><td>' + (hoursleft + minutertilltimme) + '</td></tr>';
 	var htmlrapport = htmlrapport + htmlrapportbody + '<tr><td colspan="2">Summa:</td><td style="text-align: center;">' + (alltid.t + minutertilltimme) + '</td></tr></table>';
-	var htmlend = '</body></html>'
-	res.send(htmlhead + htmlheader + htmlrapport + htmlend)
-});
+	var htmlend = '</body></html>';
+	return htmlhead + htmlheader + htmlrapport + htmlend;
+};
 
 //Laddar sidor
 app.get(['/', '/index.html'], function (req, res) {
@@ -397,21 +530,7 @@ app.get(['/', '/index.html'], function (req, res) {
 					}else{
 						var sendstoptime = stoptime;
 					};
-					var projekttider = fs.readdirSync(mapp);
-						if(projekttider.indexOf('.DS_Store') == -1){}else{
-					    	projekttider.splice(projekttider.indexOf('.DS_Store'), 1);
-					    };
-					var inklockad = false;
-					if(projekttider.length == 0){}else{
-						for (var a = projekttider.length - 1; a >= 0; a--) {
-							var data = JSON.parse(fs.readFileSync(mapp + projekttider[a], 'utf8'));
-							for (var b = data.length - 1; b >= 0; b--) {
-								if(data[b].ut == ''){
-									inklockad = data[b].in;
-								};
-							};
-						};
-					};
+					var inklockad = checkinklock(mapp);
 					if(!inklockad || inklockad == ''){
 						//Person är inte inte inklockad
 						if(!sendstarttime || sendstarttime == ''){}else{

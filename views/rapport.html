@@ -3,8 +3,9 @@
 <div id="skrivut">
 	<i class="fa fa-arrow-circle-left fa-3x" aria-hidden="true" onclick="tillbakatillprojekt();"></i>
 	#rapport#
-	<i class="fa fa-print fa-4x" aria-hidden="true" onclick="startprint('print');"></i>
-	<i class="fa fa-table fa-4x" aria-hidden="true" onclick="startprint('excell');"></i>
+	<i class="fa fa-file fa-4x" aria-hidden="true" onclick="startprint('vgrutanob');"></i>
+	<i class="fa fa-code fa-4x" aria-hidden="true" onclick="startprint('json');"></i>
+	<i class="fa fa-table fa-4x" aria-hidden="true" onclick="startprint('rapport');"></i>
 </div>
 <script type="text/javascript">
 	function tillbakatillprojekt(){
@@ -12,16 +13,15 @@
 		var projektnamn = document.getElementById('projektnamn').getAttribute('data-projektnamn');
 		window.open('/index.html?anv=' + anv + '&toshow=login&projektnamn=' + projektnamn,'_self')
 	};
-	function startprint(){
+	function startprint(layout){
 		var anv = document.getElementById('namn').getAttribute('data-vgrid');
-		//var projekt = ['Digital Whiteboard', 'MatApp'];
 		var allcheckbox = document.getElementsByClassName('checkboxwrapper');
 		var projekt = [];
 		for (var i = allcheckbox.length - 1; i >= 0; i--) {
 			projekt.push(allcheckbox[i].getElementsByTagName('input')[0].getAttribute('data-namn'));
 		};
 		var datum = document.getElementById('skrivutdatum').value;
-		window.open('/download?anv=' + anv + '&datum=' + datum + '&projektnamn=' + projekt.join('||||'), 'Tidrapport - ' + datum);
+		window.open('/download?anv=' + anv + '&layout=' + layout + '&datum=' + datum + '&projektnamn=' + projekt.join('||||'), 'Tidrapport - ' + datum, "fullscreen=yes");
 	};
 </script>
 #footer#
