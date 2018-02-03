@@ -31,8 +31,8 @@ function timebetween(start, stop, millisec){
 	var t = Math.floor(sekunder / 3600);
 	var m = Math.floor((sekunder / 60) - (t * 60));
 	var s = Math.floor(sekunder - (m * 60) - (t * 3600));
-	if(t <= 0){var t = 0;};
-	if(m <= 0){var m = 0;};
-	if(s <= 0){var s = 0;};
+	if(t <= 0 || isNaN(t)){var t = 0;};
+	if(m <= 0 || isNaN(m)){var m = 0;};
+	if(s <= 0 || isNaN(s)){var s = 0;};
 	return {"t": t, "m": m, "s": s};
 };

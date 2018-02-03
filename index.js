@@ -79,9 +79,9 @@ function timebetween(start, stop, millisec){
 	var t = Math.floor(sekunder / 3600);
 	var m = Math.floor((sekunder / 60) - (t * 60));
 	var s = Math.floor(sekunder - (m * 60) - (t * 3600));
-	if(t <= 0){var t = 0;};
-	if(m <= 0){var m = 0;};
-	if(s <= 0){var s = 0;};
+	if(t <= 0 || isNaN(t)){var t = 0;};
+	if(m <= 0 || isNaN(m)){var m = 0;};
+	if(s <= 0 || isNaN(s)){var s = 0;};
 	return {"t": t, "m": m, "s": s};
 };
 
@@ -170,15 +170,27 @@ function valkommenhtml(namn){if(activevar(namn)){var greeting = 'Välkommen ' + 
 function htmltidloggningar(loggningar){
 	var tohtml = '';
 	if(activevar(loggningar)){
+		var tosort = [];
 		for (var i = loggningar.length - 1; i >= 0; i--) {
-			var indobj = getDate('', '', loggningar[i].in);
-			if(activevar(loggningar[i].ut)){
-				var utdobj = getDate('', '', loggningar[i].ut);
+			tosort.push(loggningar[i].in);
+		};
+		var sorted = []
+		for (var i = tosort.length - 1; i >= 0; i--) {
+			for (var a = loggningar.length - 1; a >= 0; a--) {
+				if(loggningar[a].in == tosort[i]){
+					sorted.push(loggningar[a]);
+				};
+			};
+		};
+		for (var i = sorted.length - 1; i >= 0; i--) {
+			var indobj = getDate('', '', sorted[i].in);
+			if(activevar(sorted[i].ut)){
+				var utdobj = getDate('', '', sorted[i].ut);
 			}else{
 				var utdobj = {tid: ''};
 			};
-			var time = timebetween('', '', (loggningar[i].ut - loggningar[i].in));
-			var tohtml = tohtml + '<tr data-milisecin="' + loggningar[i].in + '" data-milisecut="' + loggningar[i].ut + '"><td>' + indobj.datum + '</td><td>' + indobj.tid + '</td><td>' + utdobj.tid + '</td><td>' + addzero(time.t) + ':' + addzero(time.m) + ':' + addzero(time.s) + '</td><td><i class="fa fa-trash fa-3x" aria-hidden="true" onclick="removesegment(this);"></i><i class="fa fa-pencil-square-o fa-3x" aria-hidden="true" onclick="showedit(this);"></i></td></tr>';
+			var time = timebetween('', '', (sorted[i].ut - sorted[i].in));
+			var tohtml = tohtml + '<tr data-milisecin="' + sorted[i].in + '" data-milisecut="' + sorted[i].ut + '"><td>' + indobj.datum + '</td><td>' + indobj.tid + '</td><td>' + utdobj.tid + '</td><td>' + addzero(time.t) + ':' + addzero(time.m) + ':' + addzero(time.s) + '</td><td><i class="fa fa-trash fa-3x" aria-hidden="true" onclick="removesegment(this);"></i><i class="fa fa-pencil-square-o fa-3x" aria-hidden="true" onclick="showedit(this);"></i></td></tr>';
 		};
 	};
 	return tohtml;
@@ -311,21 +323,82 @@ function checkinklock(mapp){
 var manader = ['Januari', 'Februari', 'Mars', 'April', 'Maj', 'Juni', 'Juli', 'Augusti', 'September', 'Oktober', 'Noveber', 'December'];
 //Skapr fil
 app.get('/download*', function (req, res) {
-	var anv = req.query.anv;
-	var datum = req.query.datum.split('-');
-	var layout = req.query.layout;
-	var projektnamn = req.query.projektnamn.split('||||');
-	if(layout == "vgrutanob"){
-		var html = makerapportutanob(anv, datum, projektnamn);
+	if(!req.query.datum){
+		res.send('<h1>Inget datum finns att hämta</h1>')
+	}else if(!req.query.anv){
+		res.send('<h1>Ingen användare är definierad</h1>')
+	}else if(!req.query.layout){
+		res.send('<h1>Ingen layout är vald</h1>')
+	}else if(!req.query.projektnamn){
+		res.send('<h1>Inga projekt är valda</h1>')
 	}else{
-		//json rapport
-		var html = makerapport(layout, anv, datum, projektnamn);
+		var anv = req.query.anv;
+		var datum = req.query.datum.split('-');
+		var layout = req.query.layout;
+		var projektnamn = req.query.projektnamn.split('||||');
+		if(layout == "vgrutanob"){
+			var html = makerapportutanob(anv, datum, projektnamn);
+		}else{
+			//json rapport
+			var html = makerapport(layout, anv, datum, projektnamn);
+		};
+		
+		res.send(html)
 	};
-	
-	res.send(html)
 });
 
-function makerapport(layout, anv, datum, projekt){
+function makejson(anvandare, datum, projekt){
+	var loggningar = [];
+	for (var i = 0; i < projekt.length; i++){
+		var filelink = param.link.users + anvandare + '/' + projekt[i] + '/' + datum.join('-') + '.json';
+		if(exists(filelink, '')){
+			//Varje projekt
+			var datearray = [];
+			var data = JSON.parse(fs.readFileSync(filelink, 'utf8'));
+			if(!data){}else{
+				for (var a = 0; a < data.length; a++){
+					if(data[a].ut == ''){}else{
+						var datut = getDate('', '', data[a].ut);
+						var datin = getDate('', '', data[a].in);
+						var mellan = parseInt(data[a].ut) - parseInt(data[a].in);
+						var datatopush = {"tidin": datin.tid, "tidut": datut.tid, "mellan": mellan};
+					};
+					var finnsredan = false;
+					var nummer = 0;
+					for (var b = datearray.length - 1; b >= 0; b--) {
+						if(datearray[b].datum == datin.datum){
+							var finnsredan = true;
+							var nummer = b;
+						};
+					};
+					if(finnsredan){
+						datearray[nummer].sammanlagdtid = parseInt(datearray[nummer].sammanlagdtid) + (parseInt(data[a].ut) - parseInt(data[a].in));
+						datearray[nummer].loggningar.push(datatopush)
+					}else{
+						if(datearray.length == 0){
+							datearray.push({"datum": datin.datum, "sammanlagdtid": (parseInt(data[a].ut) - parseInt(data[a].in)), "loggningar": [datatopush]})
+						}else{
+							if(datearray[0].datum.replace(/-/g, '') >= datin.datum.replace(/-/g, '')){
+								datearray.unshift({"datum": datin.datum, "sammanlagdtid": (parseInt(data[a].ut) - parseInt(data[a].in)), "loggningar": [datatopush]})
+							}else{
+								datearray.push({"datum": datin.datum, "sammanlagdtid": (parseInt(data[a].ut) - parseInt(data[a].in)), "loggningar": [datatopush]})
+							};
+						};
+					};
+				};
+			};
+			//Räkna ut sammanlagd summa för projeket
+			var projektsumma = 0;
+			for (var a = datearray.length - 1; a >= 0; a--) {
+				var projektsumma = projektsumma + datearray[a].sammanlagdtid;
+			};
+			loggningar.push({"projektnamn": projekt[i], "sammanlagdtid": projektsumma, "instamplingar": datearray});
+		};
+	};
+	return loggningar;
+};
+
+function finduser(anv){
 	var allaanv = fs.readdirSync(param.link.users);
 		if(allaanv.indexOf('.DS_Store') == -1){}else{
 	    	allaanv.splice(allaanv.indexOf('.DS_Store'), 1);
@@ -337,48 +410,15 @@ function makerapport(layout, anv, datum, projekt){
 			break;
 		};
 	};
+	return anvandare;
+};
+
+function makerapport(layout, anv, datum, projekt){
+	var anvandare = finduser(anv);
 	if(!anvandare){
 		console.log('Användare kunde inte hittas..');
 	}else{
-		var loggningar = [];
-		for (var i = 0; i < projekt.length; i++){
-			var filelink = param.link.users + anvandare + '/' + projekt[i] + '/' + datum.join('-') + '.json';
-			if(exists(filelink, '')){
-				//Varje projekt
-				var datearray = [];
-				var data = JSON.parse(fs.readFileSync(filelink, 'utf8'));
-				if(!data){}else{
-					for (var a = 0; a < data.length; a++){
-						if(data[a].ut == ''){}else{
-							var datut = getDate('', '', data[a].ut);
-							var datin = getDate('', '', data[a].in);
-							var mellan = parseInt(data[a].ut) - parseInt(data[a].in);
-							var datatopush = {"tidin": datin.tid, "tidut": datut.tid, "mellan": mellan};
-						};
-						var finnsredan = false;
-						var nummer = 0;
-						for (var b = datearray.length - 1; b >= 0; b--) {
-							if(datearray[b].datum == datin.datum){
-								var finnsredan = true;
-								var nummer = b;
-							};
-						};
-						if(finnsredan){
-							datearray[nummer].sammanlagdtid = parseInt(datearray[nummer].sammanlagdtid) + (parseInt(data[a].ut) - parseInt(data[a].in));
-							datearray[nummer].loggningar.push(datatopush)
-						}else{
-							datearray.push({"datum": datin.datum, "sammanlagdtid": (parseInt(data[a].ut) - parseInt(data[a].in)), "loggningar": [datatopush]})
-						};
-					};
-				};
-				//Räkna ut sammanlagd summa för projeket
-				var projektsumma = 0;
-				for (var a = datearray.length - 1; a >= 0; a--) {
-					var projektsumma = projektsumma + datearray[a].sammanlagdtid;
-				};
-				loggningar.push({"projektnamn": projekt[i], "sammanlagdtid": projektsumma, "instamplingar": datearray});
-			};
-		};
+		var loggningar = makejson(anvandare, datum, projekt);
 	};
 	if(layout == 'json'){return loggningar;};
 	var htmltosend = '<!DOCTYPE html> <html> <head> <title>Tidrapport för ' + datum.join('-') + '</title> <style type="text/css"> #dontprint{ zoom: 1.5; } table, tr{width: 100%; border-collapse: collapse; } td, th{border: solid 1px #000; text-align: center;} thead tr th, .head{font-weight: bold; border-bottom: solid 2px #000; text-align: left;} thead tr th:first-child, .head{border-right: solid 2px #000; } .wrapperhead{ border-top: solid 2px #000; } @media print { #dontprint, #info{ display: none; } } </style> </head> <body>';
@@ -413,9 +453,13 @@ function makerapport(layout, anv, datum, projekt){
 				};
 				if(b == 0 && a == 0){
 					var datumhtml = datumhtml + '<td#rowspanprojekt#>#sammanprojekt#</td>';
+				}else if(b == 0 && !a == 0){
+					var datumhtml = datumhtml + '</tr>';
 				};
 				if(b== 0 && a == 0 && i == 0){
 					var datumhtml = datumhtml + '#sammanmanad#</tr>';
+				}else if(b== 0 && a == 0){
+					var datumhtml = datumhtml + '</tr>';
 				};
 			};
 			var sammandagrakobj = timebetween('', '', sammandagrak);
@@ -585,6 +629,10 @@ app.get(['/', '/index.html'], function (req, res) {
 							var todayfilename = datetofetch + '.json';
 						};
 						if(exists(todayfilename, mapp)){
+							var loggningar = JSON.parse(fs.readFileSync(mapp + todayfilename, 'utf8'));
+							res.render(toshow, {"vgrid": vgrid, "namn": namn, "projekt": projekt, "projektnamn": projektnamn, "projektdatum": datum, "tidloggningar": loggningar, "todayfilename": todayfilename})
+						}else{
+							var todayfilename = datum[datum.length - 1] + '.json';
 							var loggningar = JSON.parse(fs.readFileSync(mapp + todayfilename, 'utf8'));
 							res.render(toshow, {"vgrid": vgrid, "namn": namn, "projekt": projekt, "projektnamn": projektnamn, "projektdatum": datum, "tidloggningar": loggningar, "todayfilename": todayfilename})
 						};

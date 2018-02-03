@@ -18,7 +18,10 @@
 		var allcheckbox = document.getElementsByClassName('checkboxwrapper');
 		var projekt = [];
 		for (var i = allcheckbox.length - 1; i >= 0; i--) {
-			projekt.push(allcheckbox[i].getElementsByTagName('input')[0].getAttribute('data-namn'));
+			var checkelem = allcheckbox[i].getElementsByTagName('input')[0];
+			if(checkelem.checked){
+				projekt.push(checkelem.getAttribute('data-namn'));
+			};
 		};
 		var datum = document.getElementById('skrivutdatum').value;
 		window.open('/download?anv=' + anv + '&layout=' + layout + '&datum=' + datum + '&projektnamn=' + projekt.join('||||'), 'Tidrapport - ' + datum, "fullscreen=yes");
