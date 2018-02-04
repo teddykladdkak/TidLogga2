@@ -233,6 +233,25 @@ function rapporttohtml(rapport){
 	return printcheckboxes + skrivutdatum;
 };
 
+function statstohtml(statdata, datum){
+	if(!statdata){
+		return '';
+	}else{
+		var tohtml = '<div class="center"><table><tbody><tr><td><i class="fa fa-chevron-left fa-3x" aria-hidden="true" onclick="nextpie(\'-\')"></i></td><td id="piedatum">' + datum.join('-') + '</td><td><i class="fa fa-chevron-right fa-3x" aria-hidden="true" onclick="nextpie(\'+\')"></i></td></tr></tbody></table></div>';
+		var tohtml = tohtml + '<div id="detalj" class="center"><table id="detaljtable"><tbody>';
+		var sammanmanad = 0;
+		console.log(statdata)
+		for (var i = statdata.length - 1; i >= 0; i--) {
+			var sammanmanad = parseInt(sammanmanad) + parseInt(statdata[i].sammanlagdtid);
+			var gettime = timebetween('', '', statdata[i].sammanlagdtid);
+			var tohtml = tohtml + '<tr><td>' + statdata[i].projektnamn + '</td><td>' + addzero(gettime.t) + ':' + addzero(gettime.m) + ':' + addzero(gettime.s) + '</td></tr>';
+		};
+		var samtid = timebetween('', '', sammanmanad);
+		var tohtml = tohtml + '<td colspan="2" style="font-weight: bold;text-align: center;">' + addzero(samtid.t) + ':' + addzero(samtid.m) + ':' + addzero(samtid.s) + '</td></tbody></table></div>';
+		return tohtml;
+	}
+};
+
 //Mall kod
 app.engine('html', function (filePath, options, callback) {
   fs.readFile(filePath, function (err, content) {
@@ -243,6 +262,7 @@ app.engine('html', function (filePath, options, callback) {
 	var greeting = valkommenhtml(options.namn);
 	var projektnamn = htmlprojektnamn(filePath, options.projektnamn);
 	var rapport = rapporttohtml(options.rapport);
+	var statrender = statstohtml(options.statsrender, options.statdate);
 
 	// Döljer eller visar kod som skickas till server i url
 	if(!param.hidelink){var hidelinkscript = '';}else{var hidelinkscript = '<script type="text/javascript">history.pushState(null, \'\', location.href.split(\'?\')[0]);</script>';};
@@ -260,6 +280,7 @@ app.engine('html', function (filePath, options, callback) {
     	.replace('#projektdatum#', projektdatum)
     	.replace('#tidloggningar#', tidloggningar)
     	.replace('#rapport#', rapport)
+    	.replace('#statrender#', statrender)
     return callback(null, rendered)
   })
 }).set('views', './views').set('view engine', 'html').use(express.static('public'))
@@ -483,17 +504,7 @@ function makerapportutanob(anv, datum, projekt){
 		};
 	};
 	var tidsomkanreggas = datumtouse.length * 8;
-	var allaanv = fs.readdirSync(param.link.users);
-		if(allaanv.indexOf('.DS_Store') == -1){}else{
-	    	allaanv.splice(allaanv.indexOf('.DS_Store'), 1);
-	    };
-	var anvandare = '';
-	for (var i = 0; i < allaanv.length; i++){
-		if(allaanv[i].split(param.splacertoken)[0] == anv){
-			anvandare = allaanv[i];
-			break;
-		};
-	};
+	var anvandare = finduser(anv);
 	if(!anvandare){
 		console.log('Användare kunde inte hittas..');
 	}else{
@@ -531,6 +542,18 @@ function makerapportutanob(anv, datum, projekt){
 	var htmlrapport = htmlrapport + htmlrapportbody + '<tr><td colspan="2">Summa:</td><td style="text-align: center;">' + (alltid.t + minutertilltimme) + '</td></tr></table>';
 	var htmlend = '</body></html>';
 	return htmlhead + htmlheader + htmlrapport + htmlend;
+};
+
+function searchprojekt(projektmapp, usermapp){
+	var allstuff = [];
+	for (var i = projektmapp.length - 1; i >= 0; i--) {
+		var manader = fs.readdirSync(usermapp + projektmapp[i] + '/');
+		if(manader.indexOf('.DS_Store') == -1){}else{
+	    	manader.splice(manader.indexOf('.DS_Store'), 1);
+	    };
+		allstuff.push({"namn": projektmapp[i], "datum": manader});
+	};
+	return allstuff;
 };
 
 //Laddar sidor
@@ -638,15 +661,24 @@ app.get(['/', '/index.html'], function (req, res) {
 						};
 					};
 				}else if(toshow == 'rapport'){
-					var allstuff = []
-					for (var i = projektmapp.length - 1; i >= 0; i--) {
-						var manader = fs.readdirSync(usermapp + projektmapp[i] + '/');
-							if(manader.indexOf('.DS_Store') == -1){}else{
-						    	manader.splice(manader.indexOf('.DS_Store'), 1);
-						    };
-						allstuff.push({"namn": projektmapp[i], "datum": manader});
-					};
+					var allstuff = searchprojekt(projektmapp, usermapp);
 					res.render(toshow, {"vgrid": vgrid, "namn": namn, "projekt": projekt, "projektnamn": projektnamn, "rapport": allstuff})
+				}else if(toshow == 'stat'){
+					if(!datetofetch){
+						var todayfilename = getDate().manad.split('-');
+					}else{
+						var todayfilename = datetofetch;
+					};
+					console.log(todayfilename);
+					var anvandare = vgrid + param.splacertoken + namn;
+					console.log(anvandare)
+					var allstuff = searchprojekt(projektmapp, usermapp);
+					var allaprojekt = []
+					for (var i = allstuff.length - 1; i >= 0; i--) {
+						allaprojekt.push(allstuff[i].namn);
+					};
+					var data = makejson(anvandare, todayfilename, allaprojekt);
+					res.render(toshow, {"vgrid": vgrid, "namn": namn, "projekt": projekt, "projektnamn": projektnamn, "statsrender": data, "statdate": todayfilename})
 				}else{
 					res.render('index', {"vgrid": "", "namn": "", "projekt": "", "projektnamn": ""})
 				};

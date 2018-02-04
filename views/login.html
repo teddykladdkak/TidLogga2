@@ -6,8 +6,8 @@
 		<i class="fa fa-clock-o fa-4x" aria-hidden="true" onclick="oppnasida('klocka');"></i>
 		<i class="fa fa-list fa-4x" aria-hidden="true" onclick="oppnasida('logg');"></i>
 		<i class="fa fa-print fa-4x" aria-hidden="true" onclick="oppnasida('rapport');"></i>
-		<!-- <i class="fa fa-pie-chart fa-4x" aria-hidden="true" onclick="getpie();"></i>
-		<i class="fa fa-user-plus fa-4x" aria-hidden="true" onclick="admin();"></i></div> -->
+		<i class="fa fa-pie-chart fa-4x" aria-hidden="true" onclick="oppnasida('stat');"></i>
+		<!-- <i class="fa fa-user-plus fa-4x" aria-hidden="true" onclick="admin();"></i></div> -->
 </div>
 <script type="text/javascript">
 	function oppnasida(todo){
@@ -20,7 +20,7 @@
 				window.open('/index.html?anv=' + anv + '&toshow=' + todo + '&projektnamn=' + projekt,'_self')
 			};
 		}else{
-			if(todo == 'rapport'){
+			if(todo == 'rapport' || todo == 'stat'){
 				window.open('/index.html?anv=' + anv + '&toshow=' + todo + '&projektnamn=' + projekt,'_self')
 			};
 		};
