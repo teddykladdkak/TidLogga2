@@ -22,7 +22,8 @@ var param = {
 		script: 'script/'
 	},
 	hidelink: false,
-	splacertoken: '#'
+	splacertoken: '#',
+	oldprojekt: '_old_'
 };
 
 
@@ -120,18 +121,20 @@ function htmlprojektselect(projekt, historyprojekt, namn, vgrid){
 	var tohtml = '';
 	if(activevar(projekt)){
 		for (var i =  projekt.length - 1; i >= 0; i--) {
-			if(historyprojekt == projekt[i]){
-				var selected = ' selected';
-			}else{
-				var selected = '';
+			if(!projekt[i].indexOf(param.oldprojekt) == 0){
+				if(historyprojekt == projekt[i]){
+					var selected = ' selected';
+				}else{
+					var selected = '';
+				};
+				var mapp =  usermapp + projekt[i] + '/';
+				if(checkinklock(mapp)){
+					var active = '*';
+				}else{
+					var active = '';
+				};
+				var tohtml = tohtml + '<option value="' + projekt[i] + '"' + selected + '>' + active +  projekt[i] + '</option>';
 			};
-			var mapp =  usermapp + projekt[i] + '/';
-			if(checkinklock(mapp)){
-				var active = '*';
-			}else{
-				var active = '';
-			};
-			var tohtml = tohtml + '<option value="' + projekt[i] + '"' + selected + '>' + active +  projekt[i] + '</option>';
 		};
 	};
 	return tohtml;
@@ -218,12 +221,14 @@ function rapporttohtml(rapport){
 	var idexofdates = [];
 	if(!rapport){return false;}else{
 		for (var i = rapport.length - 1; i >= 0; i--) {
-			var printcheckboxes = printcheckboxes + '<span class="checkboxwrapper"><input type="checkbox" data-namn="' + rapport[i].namn + '" checked><lable>' + rapport[i].namn + '</lable></span>';
-			for (var a = rapport[i].datum.length - 1; a >= 0; a--) {
-				var prittydate = rapport[i].datum[a].replace('.json', '');
-				if(idexofdates.indexOf(prittydate) == -1){
-					idexofdates.push(prittydate);
-					var skrivutdatum = skrivutdatum + '<option value="' + prittydate + '">' + prittydate + '</option>';
+			if(!rapport[i].namn.indexOf(param.oldprojekt) == 0){
+				var printcheckboxes = printcheckboxes + '<span class="checkboxwrapper"><input type="checkbox" data-namn="' + rapport[i].namn + '" checked><lable>' + rapport[i].namn + '</lable></span>';
+				for (var a = rapport[i].datum.length - 1; a >= 0; a--) {
+					var prittydate = rapport[i].datum[a].replace('.json', '');
+					if(idexofdates.indexOf(prittydate) == -1){
+						idexofdates.push(prittydate);
+						var skrivutdatum = skrivutdatum + '<option value="' + prittydate + '">' + prittydate + '</option>';
+					};
 				};
 			};
 		};
@@ -334,7 +339,36 @@ function statstohtml(statdata, datum){
 		return tohtml;
 	};
 };
-
+function settingtohtml(vgrid, namn, projekt){
+	if(!projekt){
+		return '';
+	}else{
+		var tablecontent = '';
+		var dolj = []
+		var visa = []
+		for (var a = 0; a < projekt.length; a++){
+			if(!projekt[a].indexOf(param.oldprojekt) == 0){
+				visa.push(projekt[a]);
+				var tablecontent = tablecontent + '<tr><td><p>' + projekt[a] + '</p></td><td><i class="fas fa-edit fa-3x" onclick="edit(this);"></i></td><td><i class="fas fa-eye fa-3x" data-synlig="true" onclick="togglesynlig(this);"></i></td></tr>';
+			}else{
+				dolj.push(projekt[a].replace(param.oldprojekt, ''));
+				var tablecontent = tablecontent + '<tr><td><p>' + projekt[a].replace(param.oldprojekt, '') + '</p></td><td><i class="fas fa-edit fa-3x" onclick="edit(this);"></i></td><td><i class="fas fa-eye-slash fa-3x" data-synlig="false" onclick="togglesynlig(this);"></i></td></tr>';
+			};
+		};
+		var projekttovaluevisa = '"' + visa.join('", "') + '"';
+		var projekttovaluedolj = '"' + dolj.join('", "') + '"';
+		var splitnamn = namn.split(' ');
+		var tohmtl = '<input type="text" name="old" style="display: none;" value="' + vgrid + param.splacertoken + namn + '">';
+		var tohmtl = tohmtl + '<p>Användarnamn:</p><input type="text" name="anv" value="' + vgrid + '">';
+		var tohmtl = tohmtl + '<p>Förnamn:</p><input type="text" name="fnamn" value="' + splitnamn[0] + '">';
+		var tohmtl = tohmtl + '<p>Efternamn:</p><input type="text" name="enamn" value="' + splitnamn[1] + '">';
+		var tohmtl = tohmtl + '<p>Projekt/Anställningar</p><label><input type="text" id="projektinput"><i class="fas fa-plus-square fa-3x" onclick="addprojekt();"></i></label>';
+		var tohmtl = tohmtl + '<br/><input type="text" style="display: none;" name="projektsynlig" value=\'' + projekttovaluevisa + '\'><br/><input type="text" style="display: none;" name="projektdold" value=\'' + projekttovaluedolj + '\'>';
+		var tohmtl = tohmtl + '<table><tbody id="projektlista">';
+		var tohmtl = tohmtl + tablecontent + '</tbody></table>';
+		return tohmtl;
+	};
+};
 //Mall kod
 app.engine('html', function (filePath, options, callback) {
   fs.readFile(filePath, function (err, content) {
@@ -346,6 +380,9 @@ app.engine('html', function (filePath, options, callback) {
 	var projektnamn = htmlprojektnamn(filePath, options.projektnamn);
 	var rapport = rapporttohtml(options.rapport);
 	var statrender = statstohtml(options.statsrender, options.statdate);
+	var settings = settingtohtml(options.vgrid, options.namn, options.projekt);
+
+
 
 	// Döljer eller visar kod som skickas till server i url
 	if(!param.hidelink){var hidelinkscript = '';}else{var hidelinkscript = '<script type="text/javascript">history.pushState(null, \'\', location.href.split(\'?\')[0]);</script>';};
@@ -361,6 +398,7 @@ app.engine('html', function (filePath, options, callback) {
     	.replace('#tidloggningar#', tidloggningar)
     	.replace('#rapport#', rapport)
     	.replace('#statrender#', statrender)
+    	.replace('#settingform#', settings)
     	.replace('#tillbakaknapp#', '#iconstart#fas fa-arrow-circle-left fa-3x#iconextra#onclick="tillbakatillprojekt();"#iconend#')
     	.replace(/#iconstart#/g, '<i class="')
     	.replace(/#iconextra#/g, '" aria-hidden="true" ')
@@ -423,6 +461,62 @@ function checkinklock(mapp){
 	return inklockad;
 };
 
+app.post('/installningar*', function(req, res) {
+	//console.log(req.body)
+	if(!req.body.anv || !req.body.fnamn || !req.body.enamn){
+		//Error
+		res.redirect('/index.html');
+	}else{
+		var userexist = finduser(req.body.anv)
+		var nynamn = req.body.anv + param.splacertoken + req.body.fnamn + ' ' + req.body.enamn;
+		if(req.body.old == nynamn){
+			console.log('Namn har inte ändrats')
+			hideorshow(nynamn, req.body.projektsynlig, req.body.projektdold);
+			res.redirect('/index.html');
+		}else{
+			//Kontrollerar ifall ID redan finns
+			if(userexist == '' || req.body.anv == req.body.old.split(param.splacertoken)[0]){
+				console.log('Namn ändras')
+				fs.renameSync(__dirname + '/' + param.link.users + req.body.old, __dirname + '/' + param.link.users + nynamn);
+				hideorshow(nynamn, req.body.projektsynlig, req.body.projektdold);
+				res.redirect('/index.html');
+			};
+		};
+			/*{ old: 'test#Test Testsson',
+			anv: 'test',
+			fnamn: 'Test',
+			enamn: 'Testsson',
+			projektsynlig: '"Digital Whiteboard", "MatAppen"',
+			projektdold: '' }*/
+	};
+});
+
+function hideorshow(anv, show, hide){
+	var userfolder = __dirname + '/' + param.link.users + anv + '/';
+	var showarray = JSON.parse("[" + show + "]");
+	for (var i = showarray.length - 1; i >= 0; i--) {
+		makeDir.sync(userfolder + showarray[i] + '/')
+	};
+	var hidearray = JSON.parse("[" + hide + "]");
+	for (var i = hidearray.length - 1; i >= 0; i--) {
+		makeDir.sync(userfolder + hidearray[i] + '/')
+	};
+	var allaprojekt = findprojekt(anv)
+	console.log('Dessa ska visas: ' + show);
+	console.log('Dessa ska döljas: ' + hide);
+	//Aktiverar alla
+	for (var i = allaprojekt.length - 1; i >= 0; i--) {
+		if(allaprojekt[i].indexOf(param.oldprojekt) == 0){
+			var oldname = allaprojekt[i];
+			var removehide = allaprojekt[i].replace(param.oldprojekt, '');
+			fs.renameSync(userfolder + oldname, userfolder + removehide);
+		};
+	};
+	for (var i = hidearray.length - 1; i >= 0; i--) {
+		var removetag = hidearray[i].replace(param.oldprojekt, '');
+		fs.renameSync(userfolder + removetag, userfolder + param.oldprojekt + removetag);
+	};
+};
 // https://api.dryg.net/dagar/v2.1/2018/2
 // Läser in vilka dagar man kan räkna med
 var manader = ['Januari', 'Februari', 'Mars', 'April', 'Maj', 'Juni', 'Juli', 'Augusti', 'September', 'Oktober', 'Noveber', 'December'];
@@ -508,7 +602,7 @@ function finduser(anv){
 		if(allaanv.indexOf('.DS_Store') == -1){}else{
 	    	allaanv.splice(allaanv.indexOf('.DS_Store'), 1);
 	    };
-	var anvandare = '';
+	var anvandare = false;
 	for (var i = 0; i < allaanv.length; i++){
 		if(allaanv[i].split(param.splacertoken)[0] == anv){
 			anvandare = allaanv[i];
@@ -516,6 +610,14 @@ function finduser(anv){
 		};
 	};
 	return anvandare;
+};
+
+function findprojekt(anvmapp){
+	var allaprojekt = fs.readdirSync(param.link.users + anvmapp + '/');
+		if(allaprojekt.indexOf('.DS_Store') == -1){}else{
+	    	allaprojekt.splice(allaprojekt.indexOf('.DS_Store'), 1);
+	    };
+	return allaprojekt;
 };
 
 function makerapport(layout, anv, datum, projekt){
@@ -643,133 +745,124 @@ function searchprojekt(projektmapp, usermapp){
 //Laddar sidor
 app.get(['/', '/index.html'], function (req, res) {
 	var anv = req.query.anv;
-	var users = fs.readdirSync(param.link.users);
-		if(users.indexOf('.DS_Store') == -1){}else{
-	    	users.splice(users.indexOf('.DS_Store'), 1);
-	    };
-	if(!anv || anv == '' || users.length == 0){
-		res.render('index', {"anv": "", "projekt": "", "projektnamn": ""})
+	var checkanv = finduser(anv);
+	if(!anv || anv == ''){
+		res.render('index', {"vgrid": "", "namn": "", "projekt": "", "projektnamn": ""})
+	}else if(!checkanv){
+		res.redirect('/index.html');
 	}else{
-		for (var i = users.length - 1; i >= 0; i--) {
-			var projektmapp = fs.readdirSync(param.link.users + users[i] + '/');
-				if(projektmapp.indexOf('.DS_Store') == -1){}else{
-			    	projektmapp.splice(projektmapp.indexOf('.DS_Store'), 1);
-			    };
-			var usersplit = users[i].split(param.splacertoken);
-			users[i] = {vgrid: usersplit[0], namn: usersplit[1], projekt: projektmapp};
-			if(users[i].vgrid == anv){
-				var usermapp = param.link.users + users[i].vgrid + param.splacertoken + users[i].namn + '/';
-				var mapp =  usermapp + req.query.projektnamn + '/';
-				var vgrid = users[i].vgrid;
-				var namn = users[i].namn;
-				var projekt = users[i].projekt;
-				var projektnamn = req.query.projektnamn;
-				var toshow = req.query.toshow;
-				var starttime = req.query.starttime;
-				var stoptime = req.query.stoptime;
-				var datetofetch = req.query.datetofetch;
-				if(toshow == 'login'){
-					res.render(toshow, {"vgrid": vgrid, "namn": namn, "projekt": projekt, "projektnamn": projektnamn})
-				}else if(toshow == 'klocka'){
-					if(!starttime){
-						var sendstarttime = '';
-					}else{
-						var sendstarttime = starttime;
-					};
-					if(!stoptime){
-						var sendstoptime = '';
-					}else{
-						var sendstoptime = stoptime;
-					};
-					var inklockad = checkinklock(mapp);
-					if(!inklockad || inklockad == ''){
-						//Person är inte inte inklockad
-						if(!sendstarttime || sendstarttime == ''){}else{
-							addinklock(vgrid, namn, projektnamn, sendstarttime);
-						};
-					}else{
-						if(!sendstoptime || sendstoptime == ''){}else{
-							addutklock(vgrid, namn, projektnamn, sendstoptime);
-						};
-					};
-					res.render(req.query.toshow, {"vgrid": vgrid, "namn": namn, "projekt": projekt, "projektnamn": projektnamn, "starttime": sendstarttime, "stoptime": sendstoptime, "inklockad": inklockad})
-				}else if(toshow == 'logg'){
-					if(!req.query.remove){}else{
-						var remove = JSON.parse(req.query.remove);
-						var findloggning = JSON.parse(fs.readFileSync(mapp + datetofetch + '.json', 'utf8'));
-						for (var c = findloggning.length - 1; c >= 0; c--) {
-							if(remove.in == findloggning[c].in){
-								if(!remove.ut == '' && remove.ut == findloggning[c].ut){
-									findloggning.splice(c, 1);
-									var borttaget = true;
-								};
-							};
-						};
-						if(findloggning.length == 0){
-							fs.unlinkSync(mapp + datetofetch + '.json');
-						}else{
-							fs.writeFileSync(mapp + datetofetch + '.json', JSON.stringify(findloggning, null, ' '))
-						};
-						if(!req.query.change || !borttaget){}else{
-							var change = JSON.parse(req.query.change);
-							if(!change.in || change.in == ''){}else{
-								addinklock(vgrid, namn, projektnamn, change.in);
-								if(!change.ut || change.ut == ''){}else{
-									addutklock(vgrid, namn, projektnamn, change.ut)
-								};
-							};
-						};
-					};
-					var datum = fs.readdirSync(mapp);
-						if(datum.indexOf('.DS_Store') == -1){}else{
-					    	datum.splice(datum.indexOf('.DS_Store'), 1);
-					    };
-					if(datum.length == 0){
-						res.render('login', {"vgrid": vgrid, "namn": namn, "projekt": projekt, "projektnamn": projektnamn})
-					}else{
-						for (var i = datum.length - 1; i >= 0; i--) {
-							datum[i] = datum[i].replace(/.json/g, '');
-						};
-						if(!datetofetch){
-							var todayfilename = getDate().manad + '.json';
-						}else{
-							var todayfilename = datetofetch + '.json';
-						};
-						if(exists(todayfilename, mapp)){
-							var loggningar = JSON.parse(fs.readFileSync(mapp + todayfilename, 'utf8'));
-							res.render(toshow, {"vgrid": vgrid, "namn": namn, "projekt": projekt, "projektnamn": projektnamn, "projektdatum": datum, "tidloggningar": loggningar, "todayfilename": todayfilename})
-						}else{
-							var todayfilename = datum[datum.length - 1] + '.json';
-							var loggningar = JSON.parse(fs.readFileSync(mapp + todayfilename, 'utf8'));
-							res.render(toshow, {"vgrid": vgrid, "namn": namn, "projekt": projekt, "projektnamn": projektnamn, "projektdatum": datum, "tidloggningar": loggningar, "todayfilename": todayfilename})
-						};
-					};
-				}else if(toshow == 'rapport'){
-					var allstuff = searchprojekt(projektmapp, usermapp);
-					res.render(toshow, {"vgrid": vgrid, "namn": namn, "projekt": projekt, "projektnamn": projektnamn, "rapport": allstuff})
-				}else if(toshow == 'stat'){
-					if(!datetofetch){
-						var todayfilename = getDate().manad.split('-');
-					}else{
-						var todayfilename = datetofetch.split('-');
-					};
-					console.log(todayfilename);
-					var anvandare = vgrid + param.splacertoken + namn;
-					console.log(anvandare)
-					var allstuff = searchprojekt(projektmapp, usermapp);
-					var allaprojekt = []
-					for (var i = allstuff.length - 1; i >= 0; i--) {
-						allaprojekt.push(allstuff[i].namn);
-					};
-					var data = makejson(anvandare, todayfilename, allaprojekt);
-					res.render(toshow, {"vgrid": vgrid, "namn": namn, "projekt": projekt, "projektnamn": projektnamn, "statsrender": data, "statdate": todayfilename})
-				}else if(toshow == 'setting'){
-					console.log('Borde funka!');
-					res.render(toshow, {"vgrid": vgrid, "namn": namn, "projekt": projekt, "projektnamn": projektnamn})
-				}else{
-					res.render('index', {"vgrid": "", "namn": "", "projekt": "", "projektnamn": ""})
+		var projektmapp = findprojekt(checkanv)
+		var usersplit = checkanv.split(param.splacertoken);
+		var vgrid = usersplit[0];
+		var namn = usersplit[1];
+		var usermapp = param.link.users + vgrid + param.splacertoken + namn + '/';
+		var mapp =  usermapp + req.query.projektnamn + '/';
+		var projekt = projektmapp;
+		var projektnamn = req.query.projektnamn;
+		var toshow = req.query.toshow;
+		var starttime = req.query.starttime;
+		var stoptime = req.query.stoptime;
+		var datetofetch = req.query.datetofetch;
+		if(toshow == 'login'){
+			res.render(toshow, {"vgrid": vgrid, "namn": namn, "projekt": projekt, "projektnamn": projektnamn})
+		}else if(toshow == 'klocka'){
+			if(!starttime){
+				var sendstarttime = '';
+			}else{
+				var sendstarttime = starttime;
+			};
+			if(!stoptime){
+				var sendstoptime = '';
+			}else{
+				var sendstoptime = stoptime;
+			};
+			var inklockad = checkinklock(mapp);
+			if(!inklockad || inklockad == ''){
+				//Person är inte inte inklockad
+				if(!sendstarttime || sendstarttime == ''){}else{
+					addinklock(vgrid, namn, projektnamn, sendstarttime);
+				};
+			}else{
+				if(!sendstoptime || sendstoptime == ''){}else{
+					addutklock(vgrid, namn, projektnamn, sendstoptime);
 				};
 			};
+			res.render(req.query.toshow, {"vgrid": vgrid, "namn": namn, "projekt": projekt, "projektnamn": projektnamn, "starttime": sendstarttime, "stoptime": sendstoptime, "inklockad": inklockad})
+		}else if(toshow == 'logg'){
+			if(!req.query.remove){}else{
+				var remove = JSON.parse(req.query.remove);
+				var findloggning = JSON.parse(fs.readFileSync(mapp + datetofetch + '.json', 'utf8'));
+				for (var c = findloggning.length - 1; c >= 0; c--) {
+					if(remove.in == findloggning[c].in){
+						if(!remove.ut == '' && remove.ut == findloggning[c].ut){
+							findloggning.splice(c, 1);
+							var borttaget = true;
+						};
+					};
+				};
+				if(findloggning.length == 0){
+					fs.unlinkSync(mapp + datetofetch + '.json');
+				}else{
+					fs.writeFileSync(mapp + datetofetch + '.json', JSON.stringify(findloggning, null, ' '))
+				};
+				if(!req.query.change || !borttaget){}else{
+					var change = JSON.parse(req.query.change);
+					if(!change.in || change.in == ''){}else{
+						addinklock(vgrid, namn, projektnamn, change.in);
+						if(!change.ut || change.ut == ''){}else{
+							addutklock(vgrid, namn, projektnamn, change.ut)
+						};
+					};
+				};
+			};
+			var datum = fs.readdirSync(mapp);
+				if(datum.indexOf('.DS_Store') == -1){}else{
+			    	datum.splice(datum.indexOf('.DS_Store'), 1);
+			    };
+			if(datum.length == 0){
+				res.render('login', {"vgrid": vgrid, "namn": namn, "projekt": projekt, "projektnamn": projektnamn})
+			}else{
+				for (var i = datum.length - 1; i >= 0; i--) {
+					datum[i] = datum[i].replace(/.json/g, '');
+				};
+				if(!datetofetch){
+					var todayfilename = getDate().manad + '.json';
+				}else{
+					var todayfilename = datetofetch + '.json';
+				};
+				if(exists(todayfilename, mapp)){
+					var loggningar = JSON.parse(fs.readFileSync(mapp + todayfilename, 'utf8'));
+					res.render(toshow, {"vgrid": vgrid, "namn": namn, "projekt": projekt, "projektnamn": projektnamn, "projektdatum": datum, "tidloggningar": loggningar, "todayfilename": todayfilename})
+				}else{
+					var todayfilename = datum[datum.length - 1] + '.json';
+					var loggningar = JSON.parse(fs.readFileSync(mapp + todayfilename, 'utf8'));
+					res.render(toshow, {"vgrid": vgrid, "namn": namn, "projekt": projekt, "projektnamn": projektnamn, "projektdatum": datum, "tidloggningar": loggningar, "todayfilename": todayfilename})
+				};
+			};
+		}else if(toshow == 'rapport'){
+			var allstuff = searchprojekt(projektmapp, usermapp);
+			res.render(toshow, {"vgrid": vgrid, "namn": namn, "projekt": projekt, "projektnamn": projektnamn, "rapport": allstuff})
+		}else if(toshow == 'stat'){
+			if(!datetofetch){
+				var todayfilename = getDate().manad.split('-');
+			}else{
+				var todayfilename = datetofetch.split('-');
+			};
+			console.log(todayfilename);
+			var anvandare = vgrid + param.splacertoken + namn;
+			console.log(anvandare)
+			var allstuff = searchprojekt(projektmapp, usermapp);
+			var allaprojekt = []
+			for (var i = allstuff.length - 1; i >= 0; i--) {
+				allaprojekt.push(allstuff[i].namn);
+			};
+			var data = makejson(anvandare, todayfilename, allaprojekt);
+			res.render(toshow, {"vgrid": vgrid, "namn": namn, "projekt": projekt, "projektnamn": projektnamn, "statsrender": data, "statdate": todayfilename})
+		}else if(toshow == 'setting'){
+			console.log('Borde funka!');
+			res.render(toshow, {"vgrid": vgrid, "namn": namn, "projekt": projekt, "projektnamn": projektnamn})
+		}else{
+			res.render('index', {"vgrid": "", "namn": "", "projekt": "", "projektnamn": ""})
 		};
 	};
 })

@@ -1,24 +1,25 @@
 #head#
 #header#
 <div id="setting">
-	#tillbakaknapp#
-	<form>
-		<p>Användarnamn:</p>
-		<input type="text" name="anv">
-		<p>Förnamn:</p>
-		<input type="text" name="fnamn">
-		<p>Efternamn:</p>
-		<input type="text" name="enamn">
-		<p>Projekt/Anställningar</p>
-		<label><input type="text" id="projektinput" onkeydown="checkkey(event, this);">("Enter" för att lägga till)</label>
-		<br/><input type="text" name="projektsynlig">
-		<br/><input type="text" name="projektdold">
-		<table><tbody id="projektlista"></tbody></table>
+	<form action="/installningar.html" method="post">
+		#settingform#
+		<input type="submit" value="Skicka" id="formbutton" style="display: none;">
+		#iconstart#fas fa-check-circle fa-4x#iconextra#onclick="post();"#iconend#
+		#iconstart#fas fa-times-circle fa-4x#iconextra#onclick="tillbakatillprojekt();"#iconend#
 	</form>
 </div>
 <script type="text/javascript">
-	function checkkey(e, element){
+	function post(){
+		document.getElementById('formbutton').click();
+	};
+	function checkkey(event){
 		if (event.which == 13 || event.keyCode == 13) {
+			event.preventDefault();
+			addprojekt();
+		};
+	};
+	function addprojekt(){
+		var element = document.getElementById('projektinput');
 			var tr = document.createElement('tr');
 				var td = document.createElement('td');
 					var p = document.createElement('p');
@@ -40,9 +41,8 @@
 					synlig.appendChild(synligicon)
 				tr.appendChild(synlig)
 			document.getElementById('projektlista').appendChild(tr);
-			element.value = '';
-			searchforprojekts();
-		};
+		element.value = '';
+		searchforprojekts();
 	};
 	function searchforprojekts(){
 		var alllines = document.getElementById('projektlista').getElementsByTagName('tr');
@@ -61,12 +61,12 @@
 		if(array.synlig.length == 0){
 			document.getElementsByName('projektsynlig')[0].value = '';
 		}else{
-			document.getElementsByName('projektsynlig')[0].value = '"' + array.synlig.join('", ') + '"';
+			document.getElementsByName('projektsynlig')[0].value = '"' + array.synlig.join('", "') + '"';
 		}
 		if(array.dold.length == 0){
 			document.getElementsByName('projektdold')[0].value = '';
 		}else{
-			document.getElementsByName('projektdold')[0].value = '"' + array.dold.join('", ') + '"';
+			document.getElementsByName('projektdold')[0].value = '"' + array.dold.join('", "') + '"';
 		}
 	}
 	function togglesynlig(element){
@@ -81,12 +81,12 @@
 		searchforprojekts();
 	};
 	function edit(element){
-		var texttoedit = element.parentElement.parentElement.getElementsByTagName('p')[0].innerText;
+		/*var texttoedit = element.parentElement.parentElement.getElementsByTagName('p')[0].innerText;
 		var projektinput = document.getElementById('projektinput');
 		projektinput.value = texttoedit;
 		element.parentNode.parentNode.parentNode.removeChild(element.parentNode.parentNode);
 		projektinput.focus();
-		searchforprojekts();
+		searchforprojekts();*/
 	};
 </script>
 <style type="text/css">
