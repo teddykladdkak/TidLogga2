@@ -36,3 +36,8 @@ function timebetween(start, stop, millisec){
 	if(s <= 0 || isNaN(s)){var s = 0;};
 	return {"t": t, "m": m, "s": s};
 };
+function tillbakatillprojekt(){
+	var anv = document.getElementById('namn').getAttribute('data-vgrid');
+	var projektnamn = document.getElementById('projektnamn').getAttribute('data-projektnamn');
+	window.open('/index.html?anv=' + anv + '&toshow=login&projektnamn=' + projektnamn,'_self')
+};

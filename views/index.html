@@ -1,12 +1,13 @@
 #head#
 #header#
 <div id="login">
-	<input type="text" id="idnamn" onkeydown="checkkey(event, 'loginbutton');" name="anv" placeholder="VGR ID">
+	<input type="text" id="idnamn" onkeydown="checkkey(event, 'loginbutton');" name="anv" placeholder="ID">
 	<span id="namnstatus"></span><br>
 	<p>
-		#iconstart#toggle-off fa-1x#iconextra#data-state="off" id="sparaknapp" onclick="changespara(this, &quot;on&quot;);"#iconend#
+		#iconstart#fas fa-toggle-off fa-1x#iconextra#data-state="off" id="sparaknapp" onclick="changespara(this, &quot;on&quot;);"#iconend#
 			 Spara användarnamn</p>
-		#iconstart#sign-in fa-5x#iconextra#id="loginbutton" onclick="loggain();"#iconend#
+		#iconstart#fas fa-sign-in-alt fa-5x#iconextra#id="loginbutton" onclick="loggain();"#iconend#
+		#iconstart#fas fa-user-plus fa-5x#iconextra#id="loginbutton" onclick=""#iconend#
 		<br>
 	<p>Vill du testa funktionaliteten? Använd användarnamn: "test3".</p>
 </div>

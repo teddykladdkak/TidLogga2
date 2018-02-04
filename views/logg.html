@@ -1,7 +1,7 @@
 #head#
 #header#
 <div id="loggwrapper">
-	<i class="fa fa-arrow-circle-left fa-3x" value="Tillbaka" aria-hidden="true" onclick="tillbakatillprojekt();"></i>
+	#tillbakaknapp#
 	<table>
 		<thead>
 			<tr>
@@ -22,19 +22,14 @@
 	<p>Ut stämpling</p>
 	<input type="date" id="loggeditutdat"><br>
 	<input type="time" id="loggedituttime"><br>
-	<i class="fa fa-check-circle fa-4x" aria-hidden="true" onclick="sendedit();"></i>
-	<i class="fa fa-times-circle fa-4x" aria-hidden="true" onclick="showhide('loggedit', 'loggwrapper');"></i>
+	#iconstart#fas fa-check-circle fa-4x#iconextra#onclick="sendedit();"#iconend#
+	#iconstart#fas fa-times-circle fa-4x#iconextra#onclick="showhide('loggedit', 'loggwrapper');"#iconend#
 </div>
 <script type="text/javascript">
 	function loggandramanad(element){
 		var anv = document.getElementById('namn').getAttribute('data-vgrid');
 		var projekt = document.getElementById('projektnamn').getAttribute('data-projektnamn');
 		window.open('/index.html?anv=' + anv + '&toshow=logg&projektnamn=' + projekt + '&datetofetch=' + element.value,'_self')
-	};
-	function tillbakatillprojekt(){
-		var anv = document.getElementById('namn').getAttribute('data-vgrid');
-		var projektnamn = document.getElementById('projektnamn').getAttribute('data-projektnamn');
-		window.open('/index.html?anv=' + anv + '&toshow=login&projektnamn=' + projektnamn,'_self')
 	};
 	function removesegment(element){
 		var anv = document.getElementById('namn').getAttribute('data-vgrid');

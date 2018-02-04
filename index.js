@@ -138,10 +138,10 @@ function htmlprojektselect(projekt, historyprojekt, namn, vgrid){
 };
 function htmlstartstoptime(inklockad, starttime, stoptime){
 	// Vilka knappar som ska visas i inloggad
-		var utklockbuttons = '#iconstart#play fa-3x in disable#iconextra##iconend##iconstart#stop fa-3x ut enable#iconextra#onclick="stopclock(\'nu\');"#iconend#'
-		var utklockbuttonsannat = '#iconstart#play in disable#iconextra##iconend##iconstart#stop ut enable#iconextra#onclick="annantid(\'ut\')"#iconend#'
-		var inklockbuttons = '#iconstart#play fa-3x in enable#iconextra#onclick="startclock(\'nu\')"#iconend##iconstart#stop fa-3x ut disable#iconextra##iconend#'
-		var inklockbuttonsannat = '#iconstart#play in enable#iconextra#onclick="annantid(\'in\')"#iconend##iconstart#stop ut disable#iconextra##iconend#'
+		var utklockbuttons = '#iconstart#fas fa-play fa-3x in disable#iconextra##iconend##iconstart#fas fa-stop fa-3x ut enable#iconextra#onclick="stopclock(\'nu\');"#iconend#'
+		var utklockbuttonsannat = '#iconstart#fas fa-play in disable#iconextra##iconend##iconstart#fas fa-stop ut enable#iconextra#onclick="annantid(\'ut\')"#iconend#'
+		var inklockbuttons = '#iconstart#fas fa-play fa-3x in enable#iconextra#onclick="startclock(\'nu\')"#iconend##iconstart#fas fa-stop fa-3x ut disable#iconextra##iconend#'
+		var inklockbuttonsannat = '#iconstart#fas fa-play in enable#iconextra#onclick="annantid(\'in\')"#iconend##iconstart#fas fa-stop ut disable#iconextra##iconend#'
 		var timecount = '';
 	if(!activevar(inklockad)){
 		//Person är inte inte inklockad
@@ -190,7 +190,7 @@ function htmltidloggningar(loggningar){
 				var utdobj = {tid: ''};
 			};
 			var time = timebetween('', '', (sorted[i].ut - sorted[i].in));
-			var tohtml = tohtml + '<tr data-milisecin="' + sorted[i].in + '" data-milisecut="' + sorted[i].ut + '"><td>' + indobj.datum + '</td><td>' + indobj.tid + '</td><td>' + utdobj.tid + '</td><td>' + addzero(time.t) + ':' + addzero(time.m) + ':' + addzero(time.s) + '</td><td><i class="fa fa-trash fa-3x" aria-hidden="true" onclick="removesegment(this);"></i><i class="fa fa-pencil-square-o fa-3x" aria-hidden="true" onclick="showedit(this);"></i></td></tr>';
+			var tohtml = tohtml + '<tr data-milisecin="' + sorted[i].in + '" data-milisecut="' + sorted[i].ut + '"><td>' + indobj.datum + '</td><td>' + indobj.tid + '</td><td>' + utdobj.tid + '</td><td>' + addzero(time.t) + ':' + addzero(time.m) + ':' + addzero(time.s) + '</td><td>#iconstart#fas fa-trash-alt fa-3x#iconextra#onclick="removesegment(this);"#iconend##iconstart#fas fa-pen-square fa-3x#iconextra#onclick="showedit(this);"#iconend#</td></tr>';
 		};
 	};
 	return tohtml;
@@ -205,7 +205,7 @@ function htmlprojektnamn(url, projektnamn){
 		var spliturltwo = url.split('/');
 		var prittyurltwo = spliturltwo[spliturltwo.length - 1];
 		console.log(prittyurltwo)
-		if(prittyurl == 'login.html' || prittyurl == 'rapport.html' || prittyurltwo == 'login.html' || prittyurltwo == 'rapport.html'){
+		if(prittyurl == 'login.html' || prittyurl == 'rapport.html' || prittyurl == 'stat.html' || prittyurltwo == 'login.html' || prittyurltwo == 'rapport.html'|| prittyurltwo == 'stat.html'){
 			return '<div id="projektnamn" class="td" data-projektnamn="' + projektnamn + '"></div>';
 		}else{
 			return '<div id="projektnamn" class="td" data-projektnamn="' + projektnamn + '">' + projektnamn + '</div>';
@@ -233,23 +233,106 @@ function rapporttohtml(rapport){
 	return printcheckboxes + skrivutdatum;
 };
 
+function monthbeforeandafter(date){
+	if(!date){
+		return false;
+	}else{
+		var split = date.split('-');
+		var prevar = parseInt(split[0]);
+		var prevman = parseInt(split[1]) - 1;
+		var nextar = parseInt(split[0]);
+		var nextman = parseInt(split[1]) + 1;
+		if(prevman <= 0){
+			var prevman = 12;
+			var prevar = prevar - 1;
+		};
+		if(nextman >= 13){
+			var nextman = 1;
+			var nextar = nextar + 1;
+		};
+		return {"prev": prevar + '-' + addzero(prevman), "next": nextar + '-' + addzero(nextman)};
+	};
+};
+
+// Kollar hur många dagar aktuell månad har
+function daysInMonth (month, year) {
+    return new Date(year, month, 0).getDate();
+};
+
+function alldatesfromtoday(json, today){
+	var todaysplit = today.split('-');
+	var dag = daysInMonth(parseInt(todaysplit[1]),parseInt(todaysplit[0]));
+	var alldates = [['Projekt']];
+	for (var i = 0; i < dag; i++){
+		alldates.push([(i + 1) + '/' + parseInt(todaysplit[1])]);
+	};
+	for (var i = 0; i < json.length; i++){
+		alldates[0].push(json[i].projektnamn)
+		for (var a = 0; a < json[i].instamplingar.length; a++){
+			var instampdat = json[i].instamplingar[a].datum.split('-');
+			var dag = parseInt(instampdat[instampdat.length - 1]);
+			alldates[dag].push((((json[i].instamplingar[a].sammanlagdtid / 1000) / 60) / 60));
+		};
+	};
+	for (var i = alldates.length - 1; i >= 0; i--) {
+		if(i == 0){}else{
+			if((alldates[0].length + 1) == alldates[i].length){}else{
+				var numbertoadd = (alldates[0].length) - alldates[i].length;
+				for (var a = 0; a < numbertoadd; a++){
+					alldates[i].push(0);
+				};
+			};
+		};
+	};
+	var totext = '';
+	for (var i = 0; i < alldates.length; i++){
+		if(i == alldates.length - 1){
+			var end = '';
+		}else{
+			var end = ', ';
+		}
+		if(i == 0){
+			var totext = totext + '[\'' + alldates[i].join("', '") + '\' ' + ', { role: \'annotation\' }]' + end;
+		}else{
+			var inputtotext = '';
+			for (var a = 0; a < alldates[i].length; a++){
+				if(a == 0){
+					var inputtotext = inputtotext + '"' + alldates[i][a] + '"';
+				}else{
+					var inputtotext = inputtotext + ', ' + alldates[i][a];
+				}
+			}
+			var totext = totext + '[' + inputtotext + ', \'\']' + end;
+		}
+	}
+	var totext = '[' + totext + ']';
+	return totext;
+};
+
 function statstohtml(statdata, datum){
 	if(!statdata){
 		return '';
 	}else{
-		var tohtml = '<div class="center"><table><tbody><tr><td><i class="fa fa-chevron-left fa-3x" aria-hidden="true" onclick="nextpie(\'-\')"></i></td><td id="piedatum">' + datum.join('-') + '</td><td><i class="fa fa-chevron-right fa-3x" aria-hidden="true" onclick="nextpie(\'+\')"></i></td></tr></tbody></table></div>';
+		var preandnext = monthbeforeandafter(datum.join('-'));
+		var tohtml = '<div class="center"><table><tbody><tr><td>#iconstart#fas fa-chevron-left fa-3x#iconextra#onclick="nextpie(\'' + preandnext.prev + '\')"#iconend#</td><td id="piedatum">' + datum.join('-') + '</td><td>#iconstart#fas fa-chevron-right fa-3x#iconextra#onclick="nextpie(\'' + preandnext.next + '\')"#iconend#</td></tr></tbody></table></div>';
 		var tohtml = tohtml + '<div id="detalj" class="center"><table id="detaljtable"><tbody>';
 		var sammanmanad = 0;
-		console.log(statdata)
-		for (var i = statdata.length - 1; i >= 0; i--) {
+		var chartData = ['["Projekt", "Tid i Millisekunder"]'];
+		for (var i = 0; i < statdata.length; i++){
 			var sammanmanad = parseInt(sammanmanad) + parseInt(statdata[i].sammanlagdtid);
 			var gettime = timebetween('', '', statdata[i].sammanlagdtid);
 			var tohtml = tohtml + '<tr><td>' + statdata[i].projektnamn + '</td><td>' + addzero(gettime.t) + ':' + addzero(gettime.m) + ':' + addzero(gettime.s) + '</td></tr>';
+			chartData.push('["' + statdata[i].projektnamn + '", ' + statdata[i].sammanlagdtid + ']');
 		};
 		var samtid = timebetween('', '', sammanmanad);
 		var tohtml = tohtml + '<td colspan="2" style="font-weight: bold;text-align: center;">' + addzero(samtid.t) + ':' + addzero(samtid.m) + ':' + addzero(samtid.s) + '</td></tbody></table></div>';
+		var tohtml = tohtml + '<script type="text/javascript">function drawChart(){var chartData = [' + chartData.join(', ') + '];var data = google.visualization.arrayToDataTable(chartData);var options = {chartArea:{left:0,top:0,width:\'100%\',height:\'100%\'},legend:{alignment: \'center\'}};var chart = new google.visualization.PieChart(document.getElementById(\'piechart\'));chart.draw(data, options);};google.charts.load(\'current\', {\'packages\':[\'corechart\']});google.charts.setOnLoadCallback(drawChart);</script>';
+		var daysdata = alldatesfromtoday(statdata, datum.join('-'));
+		var tohtml = tohtml + '<script type="text/javascript">google.charts.load("current", {packages:[\'corechart\']});google.charts.setOnLoadCallback(drawChartTable);function drawChartTable() {var data = google.visualization.arrayToDataTable(' + daysdata + ');var options = {width: \'100%\',height: 400,legend: { position: \'top\', maxLines: 3 },bar: {groupWidth: \'75%\'},isStacked: true,};var chart = new google.visualization.ColumnChart(document.getElementById(\'columnchart_stacked\'));chart.draw(data, options);}</script>';
+		var tohtml = tohtml + '<script type="text/javascript">document.getElementsByTagName(\'body\')[0].setAttribute(\'onresize\', "drawChart();drawChartTable();");</script>';
+
 		return tohtml;
-	}
+	};
 };
 
 //Mall kod
@@ -267,20 +350,21 @@ app.engine('html', function (filePath, options, callback) {
 	// Döljer eller visar kod som skickas till server i url
 	if(!param.hidelink){var hidelinkscript = '';}else{var hidelinkscript = '<script type="text/javascript">history.pushState(null, \'\', location.href.split(\'?\')[0]);</script>';};
     var rendered = content.toString()
-    	.replace('#head#', '<!DOCTYPE html><html><head><title>TidLogga</title>' + hidelinkscript + '<meta http-equiv="Content-Type" content="text/html; charset=UTF-8"><meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1"><meta content="yes" name="apple-mobile-web-app-capable"><meta content="yes" name="mobile-web-app-capable"><meta content="minimum-scale=1.0, width=device-width, maximum-scale=0.6667, user-scalable=no" name="viewport"><meta name="apple-mobile-web-app-status-bar-style" content="black"><link rel="shortcut icon" href="' + param.link.icons + 'icon.ico"><link rel="icon" type="image/vnd.microsoft.icon" href="' + param.link.icons + 'icon.ico"><link rel="icon" type="image/png" href="' + param.link.icons + 'icon196x196.png"><link rel="apple-touch-icon-precomposed" href="' + param.link.icons + 'icon180x180.png"><link rel="apple-touch-icon-precomposed" sizes="76x76" href="' + param.link.icons + 'icon76x76.png"><link rel="apple-touch-icon-precomposed" sizes="120x120" href="' + param.link.icons + 'icon120x120.png"><link rel="apple-touch-icon-precomposed" sizes="152x152" href="' + param.link.icons + 'icon152x152.png"><link rel="stylesheet" href="' + param.link.style + 'font-awesome/css/font-awesome.css"><link rel="stylesheet" href="' + param.link.style + 'main.css"><script type="application/javascript" src="' + param.link.script + 'main.js"></script>')
+    	.replace('#head#', '<!DOCTYPE html><html><head><title>TidLogga</title>' + hidelinkscript + '<meta http-equiv="Content-Type" content="text/html; charset=UTF-8"><meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1"><meta content="yes" name="apple-mobile-web-app-capable"><meta content="yes" name="mobile-web-app-capable"><meta content="minimum-scale=1.0, width=device-width, maximum-scale=0.6667, user-scalable=no" name="viewport"><meta name="apple-mobile-web-app-status-bar-style" content="black"><link rel="shortcut icon" href="' + param.link.icons + 'icon.ico"><link rel="icon" type="image/vnd.microsoft.icon" href="' + param.link.icons + 'icon.ico"><link rel="icon" type="image/png" href="' + param.link.icons + 'icon196x196.png"><link rel="apple-touch-icon-precomposed" href="' + param.link.icons + 'icon180x180.png"><link rel="apple-touch-icon-precomposed" sizes="76x76" href="' + param.link.icons + 'icon76x76.png"><link rel="apple-touch-icon-precomposed" sizes="120x120" href="' + param.link.icons + 'icon120x120.png"><link rel="apple-touch-icon-precomposed" sizes="152x152" href="' + param.link.icons + 'icon152x152.png"><link rel="stylesheet" href="' + param.link.style + 'font-awesome/css/fontawesome-all.css"><link rel="stylesheet" href="' + param.link.style + 'main.css"><script type="application/javascript" src="' + param.link.script + 'main.js"></script>')
     	.replace('#header#', '</head><body><div id="wrapper"><div id="head">TidLogga</div><div id="header" class="table"><div class="tr"><div id="namn" class="td" data-namn="' + options.namn + '" data-vgrid="' + options.vgrid + '">' + greeting + '</div>' + projektnamn + '</div></div>')
     	.replace('#footer#', '</div><div id="footer">2018&nbsp;©&nbsp;Mattias Lidbeck&nbsp;¦&nbsp;{<a href="https://www.teddyprojekt.tk/" alt="Länk till denna sida" onclick="internlink(this, event);">www.teddyprojekt.tk</a>}</div></body></html>')
     	.replace('#projektselect#', projektselect)
     	.replace('#klockbuttons#', startstoptime.main)
     	.replace('#klockbuttonsannat#', startstoptime.annat)
-    	.replace(/#iconstart#/g, '<i class="fa fa-')
-    	.replace(/#iconextra#/g, '" aria-hidden="true" ')
-    	.replace(/#iconend#/g, '></i>')
     	.replace('#timecount#', startstoptime.timecount)
     	.replace('#projektdatum#', projektdatum)
     	.replace('#tidloggningar#', tidloggningar)
     	.replace('#rapport#', rapport)
     	.replace('#statrender#', statrender)
+    	.replace('#tillbakaknapp#', '#iconstart#fas fa-arrow-circle-left fa-3x#iconextra#onclick="tillbakatillprojekt();"#iconend#')
+    	.replace(/#iconstart#/g, '<i class="')
+    	.replace(/#iconextra#/g, '" aria-hidden="true" ')
+    	.replace(/#iconend#/g, '></i>') //#iconstart# #iconextra# #iconend#
     return callback(null, rendered)
   })
 }).set('views', './views').set('view engine', 'html').use(express.static('public'))
@@ -667,7 +751,7 @@ app.get(['/', '/index.html'], function (req, res) {
 					if(!datetofetch){
 						var todayfilename = getDate().manad.split('-');
 					}else{
-						var todayfilename = datetofetch;
+						var todayfilename = datetofetch.split('-');
 					};
 					console.log(todayfilename);
 					var anvandare = vgrid + param.splacertoken + namn;
@@ -679,6 +763,9 @@ app.get(['/', '/index.html'], function (req, res) {
 					};
 					var data = makejson(anvandare, todayfilename, allaprojekt);
 					res.render(toshow, {"vgrid": vgrid, "namn": namn, "projekt": projekt, "projektnamn": projektnamn, "statsrender": data, "statdate": todayfilename})
+				}else if(toshow == 'setting'){
+					console.log('Borde funka!');
+					res.render(toshow, {"vgrid": vgrid, "namn": namn, "projekt": projekt, "projektnamn": projektnamn})
 				}else{
 					res.render('index', {"vgrid": "", "namn": "", "projekt": "", "projektnamn": ""})
 				};

@@ -3,11 +3,13 @@
 <div id="projekt">
 	<select id="listaprojekt"><option value="">Välj Projekt</option>#projektselect#</select>
 	<div id="buttonwrapper">
-		<i class="fa fa-clock-o fa-4x" aria-hidden="true" onclick="oppnasida('klocka');"></i>
-		<i class="fa fa-list fa-4x" aria-hidden="true" onclick="oppnasida('logg');"></i>
-		<i class="fa fa-print fa-4x" aria-hidden="true" onclick="oppnasida('rapport');"></i>
-		<i class="fa fa-pie-chart fa-4x" aria-hidden="true" onclick="oppnasida('stat');"></i>
+		#iconstart#fas fa-stopwatch fa-4x#iconextra#onclick="oppnasida('klocka');"#iconend#
+		#iconstart#far fa-list-alt fa-4x#iconextra#onclick="oppnasida('logg');"#iconend#
+		#iconstart#fas fa-print fa-4x#iconextra#onclick="oppnasida('rapport');"#iconend#
+		#iconstart#fas fa-chart-pie fa-4x#iconextra#onclick="oppnasida('stat');"#iconend#
+		#iconstart#fas fa-cog fa-4x#iconextra#onclick="oppnasida('setting');"#iconend#
 		<!-- <i class="fa fa-user-plus fa-4x" aria-hidden="true" onclick="admin();"></i></div> -->
+	</div>
 </div>
 <script type="text/javascript">
 	function oppnasida(todo){
@@ -20,7 +22,7 @@
 				window.open('/index.html?anv=' + anv + '&toshow=' + todo + '&projektnamn=' + projekt,'_self')
 			};
 		}else{
-			if(todo == 'rapport' || todo == 'stat'){
+			if(todo == 'rapport' || todo == 'stat' || todo == 'setting'){
 				window.open('/index.html?anv=' + anv + '&toshow=' + todo + '&projektnamn=' + projekt,'_self')
 			};
 		};

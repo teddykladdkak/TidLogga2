@@ -1,11 +1,17 @@
 #head#
+<script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>
 #header#
 <div id="statistik">
-	<i class="fa fa-arrow-circle-left fa-3x" aria-hidden="true" onclick="tillbakafranstatistik();"></i>
+	#tillbakaknapp#
 	<div id="piechart"></div>
+	<div id="columnchart_stacked"></div>
 		#statrender#
 </div>
 <script type="text/javascript">
-	
+	function nextpie(date){
+		var anv = document.getElementById('namn').getAttribute('data-vgrid');
+		var projektnamn = document.getElementById('projektnamn').getAttribute('data-projektnamn');
+		window.open('/index.html?anv=' + anv + '&toshow=stat&projektnamn=' + projektnamn + '&datetofetch=' + date,'_self')
+	};
 </script>
 #footer#

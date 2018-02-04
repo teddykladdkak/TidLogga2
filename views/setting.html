@@ -1,0 +1,97 @@
+#head#
+#header#
+<div id="setting">
+	#tillbakaknapp#
+	<form>
+		<p>Användarnamn:</p>
+		<input type="text" name="anv">
+		<p>Förnamn:</p>
+		<input type="text" name="fnamn">
+		<p>Efternamn:</p>
+		<input type="text" name="enamn">
+		<p>Projekt/Anställningar</p>
+		<label><input type="text" id="projektinput" onkeydown="checkkey(event, this);">("Enter" för att lägga till)</label>
+		<br/><input type="text" name="projektsynlig">
+		<br/><input type="text" name="projektdold">
+		<table><tbody id="projektlista"></tbody></table>
+	</form>
+</div>
+<script type="text/javascript">
+	function checkkey(e, element){
+		if (event.which == 13 || event.keyCode == 13) {
+			var tr = document.createElement('tr');
+				var td = document.createElement('td');
+					var p = document.createElement('p');
+						var ptext = document.createTextNode(element.value);
+						p.appendChild(ptext)
+					td.appendChild(p)
+				tr.appendChild(td)
+				var edit = document.createElement('td');
+					var editicon = document.createElement('i');
+						editicon.setAttribute('class', 'fas fa-edit fa-3x')
+						editicon.setAttribute('onclick', 'edit(this);')
+					edit.appendChild(editicon)
+				tr.appendChild(edit)
+				var synlig = document.createElement('td');
+					var synligicon = document.createElement('i');
+						synligicon.setAttribute('class', 'fas fa-eye fa-3x')
+						synligicon.setAttribute('data-synlig', 'true')
+						synligicon.setAttribute('onclick', 'togglesynlig(this);')
+					synlig.appendChild(synligicon)
+				tr.appendChild(synlig)
+			document.getElementById('projektlista').appendChild(tr);
+			element.value = '';
+			searchforprojekts();
+		};
+	};
+	function searchforprojekts(){
+		var alllines = document.getElementById('projektlista').getElementsByTagName('tr');
+		var array = {dold: [], synlig: []};
+		for (var i = alllines.length - 1; i >= 0; i--) {
+			var name = alllines[i].getElementsByTagName('p')[0].innerText;
+			var icon = alllines[i].getElementsByTagName('i')[1].getAttribute('data-synlig');
+			if(icon == 'true'){
+				var synligellerdold = 'synlig';
+			}else{
+				var synligellerdold = 'dold'
+			}
+			array[synligellerdold].push(name)
+		}
+		console.log(array);
+		if(array.synlig.length == 0){
+			document.getElementsByName('projektsynlig')[0].value = '';
+		}else{
+			document.getElementsByName('projektsynlig')[0].value = '"' + array.synlig.join('", ') + '"';
+		}
+		if(array.dold.length == 0){
+			document.getElementsByName('projektdold')[0].value = '';
+		}else{
+			document.getElementsByName('projektdold')[0].value = '"' + array.dold.join('", ') + '"';
+		}
+	}
+	function togglesynlig(element){
+		var nuvarande = element.getAttribute('data-synlig');
+		if(nuvarande == "true"){
+			element.setAttribute('data-synlig', 'false');
+			element.setAttribute('class', 'fas fa-eye-slash fa-3x');
+		}else{
+			element.setAttribute('data-synlig', 'true');
+			element.setAttribute('class', 'fas fa-eye fa-3x');
+		}
+		searchforprojekts();
+	};
+	function edit(element){
+		var texttoedit = element.parentElement.parentElement.getElementsByTagName('p')[0].innerText;
+		var projektinput = document.getElementById('projektinput');
+		projektinput.value = texttoedit;
+		element.parentNode.parentNode.parentNode.removeChild(element.parentNode.parentNode);
+		projektinput.focus();
+		searchforprojekts();
+	};
+</script>
+<style type="text/css">
+	.fa-eye-slash{
+		color: gray;
+	}
+</style>
+#footer#

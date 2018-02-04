@@ -1,18 +1,13 @@
 #head#
 #header#
 <div id="skrivut">
-	<i class="fa fa-arrow-circle-left fa-3x" aria-hidden="true" onclick="tillbakatillprojekt();"></i>
+	#tillbakaknapp#
 	#rapport#
-	<i class="fa fa-file fa-4x" aria-hidden="true" onclick="startprint('vgrutanob');"></i>
-	<i class="fa fa-code fa-4x" aria-hidden="true" onclick="startprint('json');"></i>
-	<i class="fa fa-table fa-4x" aria-hidden="true" onclick="startprint('rapport');"></i>
+	#iconstart#fas fa-file-alt fa-4x#iconextra#onclick="startprint('vgrutanob');"#iconend#
+	#iconstart#fas fa-code fa-4x#iconextra#onclick="startprint('json');"#iconend#
+	#iconstart#fas fa-table fa-4x#iconextra#onclick="startprint('rapport');"#iconend#
 </div>
 <script type="text/javascript">
-	function tillbakatillprojekt(){
-		var anv = document.getElementById('namn').getAttribute('data-vgrid');
-		var projektnamn = document.getElementById('projektnamn').getAttribute('data-projektnamn');
-		window.open('/index.html?anv=' + anv + '&toshow=login&projektnamn=' + projektnamn,'_self')
-	};
 	function startprint(layout){
 		var anv = document.getElementById('namn').getAttribute('data-vgrid');
 		var allcheckbox = document.getElementsByClassName('checkboxwrapper');

@@ -1,7 +1,7 @@
 #head#
 #header#
 <div id="klocka">
-	#iconstart#arrow-circle-left fa-3x#iconextra#onclick="tillbakatillprojekt();"#iconend#
+	#tillbakaknapp#
 	<div id="klockadata">
 		<span id="intid">XX:XX</span> <span id="tid"#timecount#>XX:XX:XX</span>
 	</div>
@@ -14,15 +14,10 @@
 </div>
 <div id="klockaannantid" style="display: none;">
 	<input type="date" id="dateannan"><input type="time" id="timeannan"><span id="datumstatus"></span><br>
-	#iconstart#check-circle fa-4x#iconextra#id="annantidbutton" onclick="stopclock('annat');"#iconend#
-	#iconstart#times-circle fa-4x#iconextra#onclick="showhide('klockaannantid', 'klocka');"#iconend#
+	#iconstart#fas fa-check-circle fa-4x#iconextra#id="annantidbutton" onclick="stopclock('annat');"#iconend#
+	#iconstart#fas fa-times-circle fa-4x#iconextra#onclick="showhide('klockaannantid', 'klocka');"#iconend#
 </div>
 <script type="text/javascript">
-	function tillbakatillprojekt(){
-		var anv = document.getElementById('namn').getAttribute('data-vgrid');
-		var projektnamn = document.getElementById('projektnamn').getAttribute('data-projektnamn');
-		window.open('/index.html?anv=' + anv + '&toshow=login&projektnamn=' + projektnamn,'_self')
-	};
 	var countinterval;
 	function startclock(todo){
 		var projekt = document.getElementById('projektnamn').getAttribute('data-projektnamn');
