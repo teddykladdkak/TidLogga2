@@ -1,16 +1,29 @@
 #head#
 #header#
 <div id="setting">
-	<form action="/installningar.html" method="post">
+	<form action="/andranamn.html#defaultdata#" method="post">
 		#settingform#
 		<input type="submit" value="Skicka" id="formbutton" style="display: none;">
 		#iconstart#fas fa-check-circle fa-4x#iconextra#onclick="post();"#iconend#
 		#iconstart#fas fa-times-circle fa-4x#iconextra#onclick="tillbakatillprojekt();"#iconend#
 	</form>
 </div>
+<div id="editprojekt" style="display: none;">
+	<p>Vad vill du ändra projektets/arbetets namn till?</p>
+	<form action="/edit.html#defaultdata#" method="post">
+		<input type="text" name="oldprojektname" style="display: none;">
+		<input type="text" name="newprojektname">
+		<input type="submit" value="Ändra namn" id="andranamn" style="display: none;"><br/>
+		#iconstart#fas fa-check-circle fa-4x#iconextra#onclick="andranamn();"#iconend#
+		#iconstart#fas fa-times-circle fa-4x#iconextra#onclick="showhide('editprojekt', 'setting');"#iconend#
+	</form>
+</div>
 <script type="text/javascript">
 	function post(){
 		document.getElementById('formbutton').click();
+	};
+	function andranamn(){
+		document.getElementById('andranamn').click();
 	};
 	function checkkey(event){
 		if (event.which == 13 || event.keyCode == 13) {
@@ -19,8 +32,12 @@
 		};
 	};
 	function addprojekt(){
-		var element = document.getElementById('projektinput');
-			var tr = document.createElement('tr');
+		var projektnamn = document.getElementById('projektinput').value;
+		if(projektnamn == ''){}else{
+			var anv = document.getElementById('namn').getAttribute('data-vgrid');
+			window.open('/laggtillprojekt.html?anv=' + anv + '&toshow=setting&projektnamn=&laggtillprojekt=' + projektnamn,'_self')
+		};
+			/*var tr = document.createElement('tr');
 				var td = document.createElement('td');
 					var p = document.createElement('p');
 						var ptext = document.createTextNode(element.value);
@@ -42,51 +59,28 @@
 				tr.appendChild(synlig)
 			document.getElementById('projektlista').appendChild(tr);
 		element.value = '';
-		searchforprojekts();
+		searchforprojekts();*/
 	};
-	function searchforprojekts(){
-		var alllines = document.getElementById('projektlista').getElementsByTagName('tr');
-		var array = {dold: [], synlig: []};
-		for (var i = alllines.length - 1; i >= 0; i--) {
-			var name = alllines[i].getElementsByTagName('p')[0].innerText;
-			var icon = alllines[i].getElementsByTagName('i')[1].getAttribute('data-synlig');
-			if(icon == 'true'){
-				var synligellerdold = 'synlig';
-			}else{
-				var synligellerdold = 'dold'
-			}
-			array[synligellerdold].push(name)
-		}
-		console.log(array);
-		if(array.synlig.length == 0){
-			document.getElementsByName('projektsynlig')[0].value = '';
-		}else{
-			document.getElementsByName('projektsynlig')[0].value = '"' + array.synlig.join('", "') + '"';
-		}
-		if(array.dold.length == 0){
-			document.getElementsByName('projektdold')[0].value = '';
-		}else{
-			document.getElementsByName('projektdold')[0].value = '"' + array.dold.join('", "') + '"';
-		}
-	}
 	function togglesynlig(element){
 		var nuvarande = element.getAttribute('data-synlig');
 		if(nuvarande == "true"){
 			element.setAttribute('data-synlig', 'false');
 			element.setAttribute('class', 'fas fa-eye-slash fa-3x');
+			var todo = 'dolj';
 		}else{
 			element.setAttribute('data-synlig', 'true');
 			element.setAttribute('class', 'fas fa-eye fa-3x');
+			var todo = 'visa';
 		}
-		searchforprojekts();
+		var anv = document.getElementById('namn').getAttribute('data-vgrid');
+		var projektname = element.parentElement.parentElement.getElementsByTagName('p')[0].innerText;
+		window.open('/tooglesynlig.html?anv=' + anv + '&toshow=setting&projektnamn=&visadolj=' + todo + '&projektdolja=' + projektname,'_self')
 	};
 	function edit(element){
-		/*var texttoedit = element.parentElement.parentElement.getElementsByTagName('p')[0].innerText;
-		var projektinput = document.getElementById('projektinput');
-		projektinput.value = texttoedit;
-		element.parentNode.parentNode.parentNode.removeChild(element.parentNode.parentNode);
-		projektinput.focus();
-		searchforprojekts();*/
+		var texttoedit = element.parentElement.parentElement.getElementsByTagName('p')[0].innerText;
+		document.getElementsByName('oldprojektname')[0].value = texttoedit;
+		document.getElementsByName('newprojektname')[0].value = texttoedit;
+		showhide('setting', 'editprojekt');
 	};
 </script>
 <style type="text/css">

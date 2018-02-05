@@ -21,7 +21,7 @@ var param = {
 		users: '../../Spara/user/',
 		script: 'script/'
 	},
-	hidelink: false,
+	hidelink: true,
 	splacertoken: '#',
 	oldprojekt: '_old_'
 };
@@ -193,7 +193,7 @@ function htmltidloggningar(loggningar){
 				var utdobj = {tid: ''};
 			};
 			var time = timebetween('', '', (sorted[i].ut - sorted[i].in));
-			var tohtml = tohtml + '<tr data-milisecin="' + sorted[i].in + '" data-milisecut="' + sorted[i].ut + '"><td>' + indobj.datum + '</td><td>' + indobj.tid + '</td><td>' + utdobj.tid + '</td><td>' + addzero(time.t) + ':' + addzero(time.m) + ':' + addzero(time.s) + '</td><td>#iconstart#fas fa-trash-alt fa-3x#iconextra#onclick="removesegment(this);"#iconend##iconstart#fas fa-pen-square fa-3x#iconextra#onclick="showedit(this);"#iconend#</td></tr>';
+			var tohtml = tohtml + '<tr data-milisecin="' + sorted[i].in + '" data-milisecut="' + sorted[i].ut + '"><td>' + indobj.datum + '</td><td>' + indobj.tid + '</td><td>' + utdobj.tid + '</td><td>' + addzero(time.t) + ':' + addzero(time.m) + ':' + addzero(time.s) + '</td><td>#iconstart#fas fa-trash-alt fa-3x#iconextra#onclick="removesegment(this);"#iconend##iconstart#fas fa-edit fa-3x#iconextra#onclick="showedit(this);"#iconend#</td></tr>';
 		};
 	};
 	return tohtml;
@@ -208,7 +208,7 @@ function htmlprojektnamn(url, projektnamn){
 		var spliturltwo = url.split('/');
 		var prittyurltwo = spliturltwo[spliturltwo.length - 1];
 		console.log(prittyurltwo)
-		if(prittyurl == 'login.html' || prittyurl == 'rapport.html' || prittyurl == 'stat.html' || prittyurltwo == 'login.html' || prittyurltwo == 'rapport.html'|| prittyurltwo == 'stat.html'){
+		if(prittyurl == 'login.html' || prittyurl == 'rapport.html' || prittyurl == 'stat.html' || prittyurl == 'setting.html' || prittyurltwo == 'login.html' || prittyurltwo == 'rapport.html' || prittyurltwo == 'stat.html' || prittyurltwo == 'setting.html'){
 			return '<div id="projektnamn" class="td" data-projektnamn="' + projektnamn + '"></div>';
 		}else{
 			return '<div id="projektnamn" class="td" data-projektnamn="' + projektnamn + '">' + projektnamn + '</div>';
@@ -348,27 +348,34 @@ function settingtohtml(vgrid, namn, projekt){
 		var visa = []
 		for (var a = 0; a < projekt.length; a++){
 			if(!projekt[a].indexOf(param.oldprojekt) == 0){
-				visa.push(projekt[a]);
 				var tablecontent = tablecontent + '<tr><td><p>' + projekt[a] + '</p></td><td><i class="fas fa-edit fa-3x" onclick="edit(this);"></i></td><td><i class="fas fa-eye fa-3x" data-synlig="true" onclick="togglesynlig(this);"></i></td></tr>';
 			}else{
-				dolj.push(projekt[a].replace(param.oldprojekt, ''));
-				var tablecontent = tablecontent + '<tr><td><p>' + projekt[a].replace(param.oldprojekt, '') + '</p></td><td><i class="fas fa-edit fa-3x" onclick="edit(this);"></i></td><td><i class="fas fa-eye-slash fa-3x" data-synlig="false" onclick="togglesynlig(this);"></i></td></tr>';
+				var tablecontent = tablecontent + '<tr><td><p>' + projekt[a].replace(param.oldprojekt, '') + '</p></td><td><i class="fas fa-edit fa-3x" style="color: gray;"></i></td><td><i class="fas fa-eye-slash fa-3x" data-synlig="false" onclick="togglesynlig(this);"></i></td></tr>';
 			};
 		};
-		var projekttovaluevisa = '"' + visa.join('", "') + '"';
-		var projekttovaluedolj = '"' + dolj.join('", "') + '"';
 		var splitnamn = namn.split(' ');
 		var tohmtl = '<input type="text" name="old" style="display: none;" value="' + vgrid + param.splacertoken + namn + '">';
 		var tohmtl = tohmtl + '<p>Användarnamn:</p><input type="text" name="anv" value="' + vgrid + '">';
 		var tohmtl = tohmtl + '<p>Förnamn:</p><input type="text" name="fnamn" value="' + splitnamn[0] + '">';
-		var tohmtl = tohmtl + '<p>Efternamn:</p><input type="text" name="enamn" value="' + splitnamn[1] + '">';
+		var tohmtl = tohmtl + '<p>Efternamn:</p><input type="text" name="enamn" value="' + splitnamn.splice(1, splitnamn.length - 1).join(' ') + '">';
 		var tohmtl = tohmtl + '<p>Projekt/Anställningar</p><label><input type="text" id="projektinput"><i class="fas fa-plus-square fa-3x" onclick="addprojekt();"></i></label>';
-		var tohmtl = tohmtl + '<br/><input type="text" style="display: none;" name="projektsynlig" value=\'' + projekttovaluevisa + '\'><br/><input type="text" style="display: none;" name="projektdold" value=\'' + projekttovaluedolj + '\'>';
 		var tohmtl = tohmtl + '<table><tbody id="projektlista">';
 		var tohmtl = tohmtl + tablecontent + '</tbody></table>';
 		return tohmtl;
 	};
 };
+
+function setdefaultdata(id, projekt, filePath){
+	if(!id){
+		return '';
+	}else{
+		var spliturl = filePath.split('\\');
+		var prittyurl = spliturl[spliturl.length - 1].split('/');
+		var prittyurltwo = prittyurl[prittyurl.length - 1].replace('.html', '');
+		return '?anv=' + id + '&toshow=' + prittyurltwo + '&projektnamn=' + projekt;
+	};
+};
+
 //Mall kod
 app.engine('html', function (filePath, options, callback) {
   fs.readFile(filePath, function (err, content) {
@@ -381,7 +388,7 @@ app.engine('html', function (filePath, options, callback) {
 	var rapport = rapporttohtml(options.rapport);
 	var statrender = statstohtml(options.statsrender, options.statdate);
 	var settings = settingtohtml(options.vgrid, options.namn, options.projekt);
-
+	var defaultdata = setdefaultdata(options.vgrid, options.projektnamn, filePath);
 
 
 	// Döljer eller visar kod som skickas till server i url
@@ -391,6 +398,7 @@ app.engine('html', function (filePath, options, callback) {
     	.replace('#header#', '</head><body><div id="wrapper"><div id="head">TidLogga</div><div id="header" class="table"><div class="tr"><div id="namn" class="td" data-namn="' + options.namn + '" data-vgrid="' + options.vgrid + '">' + greeting + '</div>' + projektnamn + '</div></div>')
     	.replace('#footer#', '</div><div id="footer">2018&nbsp;©&nbsp;Mattias Lidbeck&nbsp;¦&nbsp;{<a href="https://www.teddyprojekt.tk/" alt="Länk till denna sida" onclick="internlink(this, event);">www.teddyprojekt.tk</a>}</div></body></html>')
     	.replace('#projektselect#', projektselect)
+    	.replace(/#defaultdata#/g, defaultdata)
     	.replace('#klockbuttons#', startstoptime.main)
     	.replace('#klockbuttonsannat#', startstoptime.annat)
     	.replace('#timecount#', startstoptime.timecount)
@@ -461,62 +469,79 @@ function checkinklock(mapp){
 	return inklockad;
 };
 
-app.post('/installningar*', function(req, res) {
-	//console.log(req.body)
-	if(!req.body.anv || !req.body.fnamn || !req.body.enamn){
+app.post('/nyanvandare*', function(req, res) {
+	console.log(req.body);
+	if(!req.body.anv || req.body.anv == '' || !req.body.fnamn || req.body.fnamn == '' || !req.body.enamn || req.body.enamn == ''){
+		res.redirect('/index.html');
+	}else{
+		var avandare = finduser(req.body.anv);
+		if(avandare == ''){
+			var userfolder = __dirname + '/' + param.link.users;
+			makeDir.sync(userfolder + rensaochsakra(req.body.anv) + param.splacertoken + rensaochsakra(req.body.fnamn) + ' ' + rensaochsakra(req.body.enamn) + '/')
+			res.redirect('/index.html?anv=' + rensaochsakra(req.body.anv) + '&toshow=login&projektnamn=');
+		}else{
+			res.redirect('/index.html');
+		};
+	};
+});
+function rensaochsakra(vari){
+	console.log(vari);
+	return vari.replace(/[^A-Za-z0-9\s!?\u00C5\u00C4\u00D6\u00E5\u00E4\u00F6\u002D]/g,'');
+};
+app.post('/edit*', function(req, res) {
+	if(req.body.oldprojektname == req.body.newprojektname){}else{
+		var avandare = finduser(req.query.anv);
+		var userfolder = __dirname + '/' + param.link.users + avandare + '/';
+		fs.renameSync(userfolder + req.body.oldprojektname, userfolder + rensaochsakra(req.body.newprojektname));
+	};
+	res.redirect('/index.html?anv=' + req.query.anv + '&toshow=' + req.query.toshow + '&projektnamn=');
+});
+app.get('/laggtillprojekt*', function(req, res) {
+	console.log(req.query.laggtillprojekt);
+	var avandare = finduser(req.query.anv);
+	var userfolder = __dirname + '/' + param.link.users + avandare + '/';
+	makeDir.sync(userfolder + rensaochsakra(req.query.laggtillprojekt) + '/')
+	res.redirect('/index.html?anv=' + req.query.anv + '&toshow=setting&projektnamn=');
+});
+app.get('/tooglesynlig*', function(req, res) {
+	var avandare = finduser(req.query.anv);
+	var userfolder = __dirname + '/' + param.link.users + avandare + '/';
+	var projektnamn = req.query.projektdolja.replace(param.oldprojekt, '');
+	if(req.query.visadolj == 'dolj'){
+		fs.renameSync(userfolder + projektnamn, userfolder + param.oldprojekt + projektnamn);
+	}else if(req.query.visadolj == 'visa'){
+		fs.renameSync(userfolder + param.oldprojekt + projektnamn, userfolder + projektnamn);
+	}else{
+		console.log('Visa/dölj fungerar inte...')
+	};
+	res.redirect('/index.html?anv=' + req.query.anv + '&toshow=setting&projektnamn=');
+});
+app.post('/andranamn*', function(req, res) {
+	var checktestsson = req.body.old.split(param.splacertoken)[0];
+	if(!req.body.anv || !req.body.fnamn || !req.body.enamn || checktestsson == 'test3'){
 		//Error
 		res.redirect('/index.html');
 	}else{
-		var userexist = finduser(req.body.anv)
-		var nynamn = req.body.anv + param.splacertoken + req.body.fnamn + ' ' + req.body.enamn;
+		var userexist = finduser(rensaochsakra(req.body.anv))
+		var nynamn = rensaochsakra(req.body.anv) + param.splacertoken + rensaochsakra(req.body.fnamn) + ' ' + rensaochsakra(req.body.enamn);
 		if(req.body.old == nynamn){
 			console.log('Namn har inte ändrats')
-			hideorshow(nynamn, req.body.projektsynlig, req.body.projektdold);
-			res.redirect('/index.html');
+			res.redirect('/index.html?anv=' + req.query.anv + '&toshow=login&projektnamn=');
 		}else{
 			//Kontrollerar ifall ID redan finns
 			if(userexist == '' || req.body.anv == req.body.old.split(param.splacertoken)[0]){
 				console.log('Namn ändras')
 				fs.renameSync(__dirname + '/' + param.link.users + req.body.old, __dirname + '/' + param.link.users + nynamn);
-				hideorshow(nynamn, req.body.projektsynlig, req.body.projektdold);
-				res.redirect('/index.html');
+				res.redirect('/index.html?anv=' + req.body.anv + '&toshow=login&projektnamn=');
+			}else{
+				res.redirect('/index.html?anv=' + req.query.anv + '&toshow=setting&projektnamn=');
 			};
 		};
-			/*{ old: 'test#Test Testsson',
-			anv: 'test',
-			fnamn: 'Test',
-			enamn: 'Testsson',
-			projektsynlig: '"Digital Whiteboard", "MatAppen"',
-			projektdold: '' }*/
 	};
 });
 
-function hideorshow(anv, show, hide){
-	var userfolder = __dirname + '/' + param.link.users + anv + '/';
-	var showarray = JSON.parse("[" + show + "]");
-	for (var i = showarray.length - 1; i >= 0; i--) {
-		makeDir.sync(userfolder + showarray[i] + '/')
-	};
-	var hidearray = JSON.parse("[" + hide + "]");
-	for (var i = hidearray.length - 1; i >= 0; i--) {
-		makeDir.sync(userfolder + hidearray[i] + '/')
-	};
-	var allaprojekt = findprojekt(anv)
-	console.log('Dessa ska visas: ' + show);
-	console.log('Dessa ska döljas: ' + hide);
-	//Aktiverar alla
-	for (var i = allaprojekt.length - 1; i >= 0; i--) {
-		if(allaprojekt[i].indexOf(param.oldprojekt) == 0){
-			var oldname = allaprojekt[i];
-			var removehide = allaprojekt[i].replace(param.oldprojekt, '');
-			fs.renameSync(userfolder + oldname, userfolder + removehide);
-		};
-	};
-	for (var i = hidearray.length - 1; i >= 0; i--) {
-		var removetag = hidearray[i].replace(param.oldprojekt, '');
-		fs.renameSync(userfolder + removetag, userfolder + param.oldprojekt + removetag);
-	};
-};
+
+
 // https://api.dryg.net/dagar/v2.1/2018/2
 // Läser in vilka dagar man kan räkna med
 var manader = ['Januari', 'Februari', 'Mars', 'April', 'Maj', 'Juni', 'Juli', 'Augusti', 'September', 'Oktober', 'Noveber', 'December'];

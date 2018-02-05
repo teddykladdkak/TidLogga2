@@ -40,7 +40,7 @@ input, select, #klockadata, p {
 i, input, select, #klockadata, p {
 	margin: 5px;
 }
-#login, #projekt, #klocka, #klockaannantid, #loggwrapper, #loggedit, #skrivut, #statistik, #pengar, #setting{
+#login, #projekt, #klocka, #klockaannantid, #loggwrapper, #loggedit, #skrivut, #statistik, #pengar, #setting, #editprojekt, #nyanvandare{
 	border: solid #000 3px;
 }
 #loggwrapper table, #detaljtable{
@@ -141,17 +141,6 @@ i{
 		margin-left: 0px;
 		padding-right: 0px;
 		padding-left: 0px;
-	}
-}
-@media print { 
-	#login, #projekt, #klocka, #klockaannantid, #loggwrapper, #loggedit, #skrivut, #namn, #projektnamn, #head, #admin, #statistik, #pengar, #loader, #overlay{
-		display: none;
-	}
-	#skrivutpapper{
-		display: block!important;
-	}
-	#skrivutpapper table{
-		border: solid #000 3px;
 	}
 }
 .disable{
