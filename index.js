@@ -10,7 +10,7 @@ var request = require('sync-request');
 
 //Parametrar till stil
 var param = {
-	port: 3333,
+	port: 7788,
 	titel: 'TidLogga',
 	beskrivning: 'Tidloggning när det är som bäst! Minimalistiskt, ikonbaserat utseende för snabbare interaktion!',
 	url: 'http://www.tidlogga.tk/',
