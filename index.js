@@ -276,7 +276,7 @@ function alldatesfromtoday(json, today){
 		for (var a = 0; a < json[i].instamplingar.length; a++){
 			var instampdat = json[i].instamplingar[a].datum.split('-');
 			var dag = parseInt(instampdat[instampdat.length - 1]);
-			alldates[dag].push((((json[i].instamplingar[a].sammanlagdtid / 1000) / 60) / 60));
+			alldates[dag].push(((json[i].instamplingar[a].sammanlagdtid / 1000) / 60));
 		};
 	};
 	for (var i = alldates.length - 1; i >= 0; i--) {
@@ -474,11 +474,11 @@ app.post('/nyanvandare*', function(req, res) {
 	if(!req.body.anv || req.body.anv == '' || !req.body.fnamn || req.body.fnamn == '' || !req.body.enamn || req.body.enamn == ''){
 		res.redirect('/index.html');
 	}else{
-		var avandare = finduser(req.body.anv);
+		var avandare = finduser(req.body.anv.toLowerCase());
 		if(avandare == ''){
 			var userfolder = __dirname + '/' + param.link.users;
-			makeDir.sync(userfolder + rensaochsakra(req.body.anv) + param.splacertoken + rensaochsakra(req.body.fnamn) + ' ' + rensaochsakra(req.body.enamn) + '/')
-			res.redirect('/index.html?anv=' + rensaochsakra(req.body.anv) + '&toshow=login&projektnamn=');
+			makeDir.sync(userfolder + rensaochsakra(req.body.anv.toLowerCase()) + param.splacertoken + rensaochsakra(req.body.fnamn) + ' ' + rensaochsakra(req.body.enamn) + '/')
+			res.redirect('/index.html?anv=' + rensaochsakra(req.body.anv.toLowerCase()) + '&toshow=login&projektnamn=');
 		}else{
 			res.redirect('/index.html');
 		};
@@ -517,24 +517,24 @@ app.get('/tooglesynlig*', function(req, res) {
 	res.redirect('/index.html?anv=' + req.query.anv + '&toshow=setting&projektnamn=');
 });
 app.post('/andranamn*', function(req, res) {
-	var checktestsson = req.body.old.split(param.splacertoken)[0];
+	var checktestsson = req.body.old.toLowerCase().split(param.splacertoken)[0];
 	if(!req.body.anv || !req.body.fnamn || !req.body.enamn || checktestsson == 'test3'){
 		//Error
 		res.redirect('/index.html');
 	}else{
-		var userexist = finduser(rensaochsakra(req.body.anv))
-		var nynamn = rensaochsakra(req.body.anv) + param.splacertoken + rensaochsakra(req.body.fnamn) + ' ' + rensaochsakra(req.body.enamn);
+		var userexist = finduser(rensaochsakra(req.body.anv.toLowerCase()))
+		var nynamn = rensaochsakra(req.body.anv.toLowerCase()) + param.splacertoken + rensaochsakra(req.body.fnamn) + ' ' + rensaochsakra(req.body.enamn);
 		if(req.body.old == nynamn){
 			console.log('Namn har inte ändrats')
-			res.redirect('/index.html?anv=' + req.query.anv + '&toshow=login&projektnamn=');
+			res.redirect('/index.html?anv=' + req.query.anv.toLowerCase() + '&toshow=login&projektnamn=');
 		}else{
 			//Kontrollerar ifall ID redan finns
-			if(userexist == '' || req.body.anv == req.body.old.split(param.splacertoken)[0]){
+			if(userexist == '' || req.body.anv.toLowerCase() == req.body.old.split(param.splacertoken)[0]){
 				console.log('Namn ändras')
 				fs.renameSync(__dirname + '/' + param.link.users + req.body.old, __dirname + '/' + param.link.users + nynamn);
-				res.redirect('/index.html?anv=' + req.body.anv + '&toshow=login&projektnamn=');
+				res.redirect('/index.html?anv=' + req.body.anv.toLowerCase() + '&toshow=login&projektnamn=');
 			}else{
-				res.redirect('/index.html?anv=' + req.query.anv + '&toshow=setting&projektnamn=');
+				res.redirect('/index.html?anv=' + req.query.anv.toLowerCase() + '&toshow=setting&projektnamn=');
 			};
 		};
 	};
@@ -623,18 +623,23 @@ function makejson(anvandare, datum, projekt){
 };
 
 function finduser(anv){
-	var allaanv = fs.readdirSync(param.link.users);
-		if(allaanv.indexOf('.DS_Store') == -1){}else{
-	    	allaanv.splice(allaanv.indexOf('.DS_Store'), 1);
-	    };
-	var anvandare = false;
-	for (var i = 0; i < allaanv.length; i++){
-		if(allaanv[i].split(param.splacertoken)[0] == anv){
-			anvandare = allaanv[i];
-			break;
+	if(!anv){
+		return '';
+	}else{
+		var anvtolo = anv.toLowerCase();
+		var allaanv = fs.readdirSync(param.link.users);
+			if(allaanv.indexOf('.DS_Store') == -1){}else{
+		    	allaanv.splice(allaanv.indexOf('.DS_Store'), 1);
+		    };
+		var anvandare = false;
+		for (var i = 0; i < allaanv.length; i++){
+			if(allaanv[i].split(param.splacertoken)[0] == anvtolo){
+				anvandare = allaanv[i];
+				break;
+			};
 		};
+		return anvandare;
 	};
-	return anvandare;
 };
 
 function findprojekt(anvmapp){
@@ -739,7 +744,7 @@ function makerapportutanob(anv, datum, projekt){
 	var timetoday = (parseInt(alltid.t) / 8).toString().split('.');
 	var hoursleft = alltid.t - (timetoday[0] * 8);
 	var minutertilltimme = Math.ceil(((alltid.m / 60) * 10)) / 10;
-	var htmlhead = '<!DOCTYPE html> <html> <head> <title>Tidrapport - ' + manader[parseInt(datum[1])] + ' ' + datum[0] + '</title> <style type="text/css"> #dontprint{ zoom: 1.5; } #info{font-size: 18px; background-color: yellow; margin: 10px; padding: 5px;} .printedit{background-color: #CCC;} h1{font-size: 20px; margin: 3px;} p{font-size: 15px; margin: 3px;} table#header{margin-bottom: 30px; } table#header, #header tr{width: 100%; } td{border: solid 1px #000; } table, tr{border-collapse: collapse; } @media print { #dontprint, #info{ display: none; } } </style> </head> <body>';
+	var htmlhead = '<!DOCTYPE html> <html> <head> <title>Tidrapport - ' + manader[parseInt(datum[1]) - 1] + ' ' + datum[0] + '</title> <style type="text/css"> #dontprint{ zoom: 1.5; } #info{font-size: 18px; background-color: yellow; margin: 10px; padding: 5px;} .printedit{background-color: #CCC;} h1{font-size: 20px; margin: 3px;} p{font-size: 15px; margin: 3px;} table#header{margin-bottom: 30px; } table#header, #header tr{width: 100%; } td{border: solid 1px #000; } table, tr{border-collapse: collapse; } @media print { #dontprint, #info{ display: none; } } </style> </head> <body>';
 	var htmlhead = htmlhead + '<input type="button" value="Skriv ut" onclick="window.print();" id="dontprint"><div id="info">Observera att denna blanketten tar bort all OB. Den räknar ihop sammanlagd tid du registrerat under månaden. Kollar med register vilka dagar som inte är OB på och lägger in heldagar fram till att timmarna är fyllda.</div>'
 	var htmlheader = '<table id="header"><tr><td colspan="4"><h1>Tjänstgöringsrapport timavlönad Sahlgrenska Universitetssjukhuset</h1></td></tr><tr><td><p>Anställd:</p><p>' + fileparam.namn + '</p></td><td><p>Pers nr:</p><p class="printedit" contenteditable="true">' + fileparam.personnr + '</p></td><td><p>Titel:</p><p class="printedit" contenteditable="true">' + fileparam.titel + '</p></td><td><p>Ansvarsenhet:</p><p class="printedit" contenteditable="true">' + fileparam.ansvar + '</p></td></tr><tr><td colspan="4"><p>Attesterande chef:<br/><br/></p></td></tr><tr><td colspan="4"><p>Namnförtydligande: <span class="printedit" contenteditable="true">' + fileparam.namnchef + '</span></p></td></tr><tr><td colspan="4"><p>Telefon: <span class="printedit" contenteditable="true">' + fileparam.telefon + '</span></p></td></tr></table>';
 	var htmlrapport = '<table><tr><td colspan="3">Månad: ' + manader[parseInt(datum[1]) - 1] + ' ' + datum[0] + '</td></tr><tr><td>Datum</td><td>Arbetat tid</td><td>Timmar</td></tr>';
