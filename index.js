@@ -276,7 +276,7 @@ function alldatesfromtoday(json, today){
 		for (var a = 0; a < json[i].instamplingar.length; a++){
 			var instampdat = json[i].instamplingar[a].datum.split('-');
 			var dag = parseInt(instampdat[instampdat.length - 1]);
-			alldates[dag].push(((json[i].instamplingar[a].sammanlagdtid / 1000) / 60));
+			alldates[dag].push((json[i].instamplingar[a].sammanlagdtid / 1000));
 		};
 	};
 	for (var i = alldates.length - 1; i >= 0; i--) {
