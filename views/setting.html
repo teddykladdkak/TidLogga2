@@ -35,7 +35,7 @@
 		var projektnamn = document.getElementById('projektinput').value;
 		if(projektnamn == ''){}else{
 			var anv = document.getElementById('namn').getAttribute('data-vgrid');
-			window.open('/laggtillprojekt.html?anv=' + anv + '&toshow=setting&projektnamn=&laggtillprojekt=' + projektnamn,'_self')
+			window.open(encodeURI('/laggtillprojekt.html?anv=' + anv + '&toshow=setting&projektnamn=&laggtillprojekt=' + projektnamn),'_self')
 		};
 			/*var tr = document.createElement('tr');
 				var td = document.createElement('td');
@@ -74,7 +74,7 @@
 		}
 		var anv = document.getElementById('namn').getAttribute('data-vgrid');
 		var projektname = element.parentElement.parentElement.getElementsByTagName('p')[0].innerText;
-		window.open('/tooglesynlig.html?anv=' + anv + '&toshow=setting&projektnamn=&visadolj=' + todo + '&projektdolja=' + projektname,'_self')
+		window.open(encodeURI('/tooglesynlig.html?anv=' + anv + '&toshow=setting&projektnamn=&visadolj=' + todo + '&projektdolja=' + projektname),'_self')
 	};
 	function edit(element){
 		var texttoedit = element.parentElement.parentElement.getElementsByTagName('p')[0].innerText;

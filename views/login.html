@@ -19,11 +19,11 @@
 			if(projekt == ''){
 				document.getElementById('listaprojekt').setAttribute('style', 'border: solid 3px #F00')
 			}else{
-				window.open('/index.html?anv=' + anv + '&toshow=' + todo + '&projektnamn=' + projekt,'_self')
+				window.open(encodeURI('/index.html?anv=' + anv + '&toshow=' + todo + '&projektnamn=' + projekt),'_self')
 			};
 		}else{
 			if(todo == 'rapport' || todo == 'stat' || todo == 'setting'){
-				window.open('/index.html?anv=' + anv + '&toshow=' + todo + '&projektnamn=' + projekt,'_self')
+				window.open(encodeURI('/index.html?anv=' + anv + '&toshow=' + todo + '&projektnamn=' + projekt),'_self')
 			};
 		};
 	};

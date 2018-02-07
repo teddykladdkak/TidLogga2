@@ -3,9 +3,33 @@
 <div id="skrivut">
 	#tillbakaknapp#
 	#rapport#
-	#iconstart#fas fa-file-alt fa-4x#iconextra#onclick="startprint('vgrutanob');"#iconend#
-	#iconstart#fas fa-code fa-4x#iconextra#onclick="startprint('json');"#iconend#
-	#iconstart#fas fa-table fa-4x#iconextra#onclick="startprint('rapport');"#iconend#
+	<div class="divtable">
+		<div class="divline">
+			<div class="divruta">
+				#iconstart#fas fa-file-alt fa-4x#iconextra#onclick="startprint('vgrutanob');"#iconend#
+			</div>
+			<div class="divruta">
+				#iconstart#fas fa-code fa-4x#iconextra#onclick="startprint('json');"#iconend#
+			</div>
+			<div class="divruta">
+				#iconstart#fas fa-table fa-4x#iconextra#onclick="startprint('rapport');"#iconend#
+			</div>
+		</div>
+		<div class="divline">
+			<div class="divruta">
+				<label>Tidrapport, räknar bort OB</label>
+			</div>
+			<div class="divruta">
+				<label>JSON kod för extern användning</label>
+			</div>
+			<div class="divruta">
+				<label>Detaljerad tidrapport</label>
+			</div>
+		</div>
+	</div>
+	
+	
+	
 </div>
 <script type="text/javascript">
 	function startprint(layout){
@@ -19,7 +43,7 @@
 			};
 		};
 		var datum = document.getElementById('skrivutdatum').value;
-		window.open('/download?anv=' + anv + '&layout=' + layout + '&datum=' + datum + '&projektnamn=' + projekt.join('||||'), 'Tidrapport - ' + datum, "fullscreen=yes");
+		window.open(encodeURI('/download?anv=' + anv + '&layout=' + layout + '&datum=' + datum + '&projektnamn=' + projekt.join('||||'), 'Tidrapport - ' + datum), "fullscreen=yes");
 	};
 </script>
 #footer#

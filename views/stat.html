@@ -11,7 +11,7 @@
 	function nextpie(date){
 		var anv = document.getElementById('namn').getAttribute('data-vgrid');
 		var projektnamn = document.getElementById('projektnamn').getAttribute('data-projektnamn');
-		window.open('/index.html?anv=' + anv + '&toshow=stat&projektnamn=' + projektnamn + '&datetofetch=' + date,'_self')
+		window.open(encodeURI('/index.html?anv=' + anv + '&toshow=stat&projektnamn=' + projektnamn + '&datetofetch=' + date),'_self')
 	};
 </script>
 #footer#

@@ -1,5 +1,18 @@
-body{
-	
+html {
+	height: 100%;
+	box-sizing: border-box;
+}
+*,
+*:before,
+*:after {
+	box-sizing: inherit;
+}
+body {
+	position: relative;
+	margin: 0;
+	padding:0px;
+	padding-bottom: 6rem;
+	min-height: 100%;
 }
 #wrapper{
 	max-width: 1000px;
@@ -16,6 +29,7 @@ body{
 	font-weight: bold;
 	font-family: verdana;
 	text-align: center;
+	padding: 10px;
 }
 #projektnamn, #namn {
 	text-align: left;
@@ -34,7 +48,13 @@ body{
 		text-align: right;
 	}
 }
-input, select, #klockadata, p {
+i{
+	cursor: pointer;
+}
+i.disable{
+	cursor: not-allowed;
+}
+input, select {
 	zoom: 1.5;
 }
 i, input, select, #klockadata, p {
@@ -97,12 +117,50 @@ i{
     -ms-transition: all 200ms linear;
     transition: all 200ms linear;
 }
+#buttonwrapper{
+	text-align: center;
+}
+.divtable{
+	display: table;
+}
+.divline{
+	display: table-row;
+}
+.divruta{
+	vertical-align: top;
+	display: table-cell;
+}
+#skrivut .divtable, #skrivut .divline{
+	width: 100%;
+	text-align: center;
+}
+#setting .divruta{
+	vertical-align: middle;
+}
+#skrivut .divruta{
+	padding-right: 5px;
+	padding-left: 5px;
+}
 @media screen and (min-width: 650px) {
 	#projekt i{
 		font-size: 7em!important;
 	}
-	#buttonwrapper{
-		text-align: center;
+}
+#klockadata {
+	font-size: 23px;
+}
+p{
+	font-size: 20px;
+}
+td{
+	font-size: 15px;
+}
+@media screen and (min-width: 500px) {
+	#klockadata, p{
+		font-size: 25px;
+	}
+	td {
+		font-size: 20px;
 	}
 }
 #loggwrapper table {
@@ -113,6 +171,18 @@ i{
 	padding: 10px;
 }
 @media screen and (max-width: 300px) {
+	.divtable{
+		display: block;
+	}
+	.divline{
+		display: inline-block;
+	}
+	.divruta{
+		display: inline-block;
+	}
+	.divruta label{
+		display: none;
+	}
 	#projekt select, input[type=text], input[type=button], input[type=date], input[type=time]{
 		width: 88%;
 	}
@@ -136,7 +206,7 @@ i{
 @media screen and (max-width: 500px) {
 	#idnamn{
 		zoom: 3;
-		width: 88%;
+		width: 100%;
 		margin-right: 0px;
 		margin-left: 0px;
 		padding-right: 0px;
@@ -200,7 +270,15 @@ i.disable:hover{
 	color: green;
 }
 #footer{
+	position: absolute;
+	right: 0;
+	bottom: 0;
+	left: 0;
+	padding: 1rem;
 	text-align: center;
+}
+#footer a, #footer a:hover{
+	color: #000;
 }
 #setting table{
 	margin: 5px;

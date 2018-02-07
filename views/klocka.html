@@ -29,7 +29,7 @@
 			var annatdatum = document.getElementById('dateannan').value;
 			var datum = getDate(annatdatum, annattid);
 		};
-		window.open('/index.html?anv=' + anv + '&toshow=klocka&projektnamn=' + projekt + '&starttime=' + datum.milisec,'_self')
+		window.open(encodeURI('/index.html?anv=' + anv + '&toshow=klocka&projektnamn=' + projekt + '&starttime=' + datum.milisec),'_self')
 	};
 	function stopclock(todo){
 		clearInterval(countinterval);
@@ -46,7 +46,7 @@
 		};
 		var inklocktid = document.getElementById('tid').getAttribute('data-milisec');
 		if(inklocktid <= datum.milisec){
-			window.open('/index.html?anv=' + anv + '&toshow=klocka&projektnamn=' + projekt + '&stoptime=' + datum.milisec,'_self')
+			window.open(encodeURI('/index.html?anv=' + anv + '&toshow=klocka&projektnamn=' + projekt + '&stoptime=' + datum.milisec),'_self')
 		}else{
 			annattidelem.setAttribute('style', 'border: solid 3px #F00');
 			annatdatumelem.setAttribute('style', 'border: solid 3px #F00');

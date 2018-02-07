@@ -29,14 +29,14 @@
 	function loggandramanad(element){
 		var anv = document.getElementById('namn').getAttribute('data-vgrid');
 		var projekt = document.getElementById('projektnamn').getAttribute('data-projektnamn');
-		window.open('/index.html?anv=' + anv + '&toshow=logg&projektnamn=' + projekt + '&datetofetch=' + element.value,'_self')
+		window.open(encodeURI('/index.html?anv=' + anv + '&toshow=logg&projektnamn=' + projekt + '&datetofetch=' + element.value),'_self')
 	};
 	function removesegment(element){
 		var anv = document.getElementById('namn').getAttribute('data-vgrid');
 		var projekt = document.getElementById('projektnamn').getAttribute('data-projektnamn');
 		var parent = element.parentElement.parentElement;
 		var datum = document.getElementById('loggandramanad').value;
-		window.open('/index.html?anv=' + anv + '&toshow=logg&projektnamn=' + projekt + '&datetofetch=' + datum + '&remove={"in":"' + parent.getAttribute('data-milisecin') + '","ut":"' + parent.getAttribute('data-milisecut') + '"}','_self')
+		window.open(encodeURI('/index.html?anv=' + anv + '&toshow=logg&projektnamn=' + projekt + '&datetofetch=' + datum + '&remove={"in":"' + parent.getAttribute('data-milisecin') + '","ut":"' + parent.getAttribute('data-milisecut') + '"}'),'_self')
 	};
 	function showedit(element){
 		var parent = element.parentElement.parentElement;
@@ -68,7 +68,7 @@
 			nyttutdat.setAttribute('style', 'border: solid 3px red;')
 			nyttuttid.setAttribute('style', 'border: solid 3px red;')
 		}else{
-			window.open('/index.html?anv=' + anv + '&toshow=logg&projektnamn=' + projekt + '&datetofetch=' + datum + '&remove={"in":"' + loggedit.getAttribute('data-milisecin') + '","ut":"' + loggedit.getAttribute('data-milisecut') + '"}&change={"in":"' + millisecin + '","ut":"' + millisecut + '"}','_self')
+			window.open(encodeURI('/index.html?anv=' + anv + '&toshow=logg&projektnamn=' + projekt + '&datetofetch=' + datum + '&remove={"in":"' + loggedit.getAttribute('data-milisecin') + '","ut":"' + loggedit.getAttribute('data-milisecut') + '"}&change={"in":"' + millisecin + '","ut":"' + millisecut + '"}'),'_self')
 		};
 	};
 </script>

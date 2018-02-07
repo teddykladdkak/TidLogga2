@@ -23,7 +23,8 @@ var param = {
 	},
 	hidelink: true,
 	splacertoken: '#',
-	oldprojekt: '_old_'
+	oldprojekt: '_old_',
+	activetoken: '[Pågående]'
 };
 
 
@@ -34,7 +35,6 @@ app.use(bodyParser.urlencoded({ extended: true }));
 //Kontrollerar ifall fil existerar
 function exists(path, dir){
 	var wholepath = __dirname + '/' + dir + path;
-//	console.log(wholepath);
 	if (fs.existsSync(wholepath)) {
 		return true;
 	}else{
@@ -88,7 +88,6 @@ function timebetween(start, stop, millisec){
 
 // Kollar ifall variabel innehåller värde
 function activevar(variabel){
-	//console.log(variabel)
 	if(!variabel || variabel == '' || variabel.length == 0){
 		return false;
 	}else{
@@ -129,7 +128,7 @@ function htmlprojektselect(projekt, historyprojekt, namn, vgrid){
 				};
 				var mapp =  usermapp + projekt[i] + '/';
 				if(checkinklock(mapp)){
-					var active = '*';
+					var active = param.activetoken;
 				}else{
 					var active = '';
 				};
@@ -204,10 +203,8 @@ function htmlprojektnamn(url, projektnamn){
 	}else{
 		var spliturl = url.split('\\');
 		var prittyurl = spliturl[spliturl.length - 1];
-		console.log(prittyurl)
 		var spliturltwo = url.split('/');
 		var prittyurltwo = spliturltwo[spliturltwo.length - 1];
-		console.log(prittyurltwo)
 		if(prittyurl == 'login.html' || prittyurl == 'rapport.html' || prittyurl == 'stat.html' || prittyurl == 'setting.html' || prittyurltwo == 'login.html' || prittyurltwo == 'rapport.html' || prittyurltwo == 'stat.html' || prittyurltwo == 'setting.html'){
 			return '<div id="projektnamn" class="td" data-projektnamn="' + projektnamn + '"></div>';
 		}else{
@@ -350,7 +347,7 @@ function settingtohtml(vgrid, namn, projekt){
 			if(!projekt[a].indexOf(param.oldprojekt) == 0){
 				var tablecontent = tablecontent + '<tr><td><p>' + projekt[a] + '</p></td><td><i class="fas fa-edit fa-3x" onclick="edit(this);"></i></td><td><i class="fas fa-eye fa-3x" data-synlig="true" onclick="togglesynlig(this);"></i></td></tr>';
 			}else{
-				var tablecontent = tablecontent + '<tr><td><p>' + projekt[a].replace(param.oldprojekt, '') + '</p></td><td><i class="fas fa-edit fa-3x" style="color: gray;"></i></td><td><i class="fas fa-eye-slash fa-3x" data-synlig="false" onclick="togglesynlig(this);"></i></td></tr>';
+				var tablecontent = tablecontent + '<tr><td><p>' + projekt[a].replace(param.oldprojekt, '') + '</p></td><td><i class="fas fa-edit fa-3x disable"></i></td><td><i class="fas fa-eye-slash fa-3x" data-synlig="false" onclick="togglesynlig(this);"></i></td></tr>';
 			};
 		};
 		var splitnamn = namn.split(' ');
@@ -358,7 +355,7 @@ function settingtohtml(vgrid, namn, projekt){
 		var tohmtl = tohmtl + '<p>Användarnamn:</p><input type="text" name="anv" value="' + vgrid + '">';
 		var tohmtl = tohmtl + '<p>Förnamn:</p><input type="text" name="fnamn" value="' + splitnamn[0] + '">';
 		var tohmtl = tohmtl + '<p>Efternamn:</p><input type="text" name="enamn" value="' + splitnamn.splice(1, splitnamn.length - 1).join(' ') + '">';
-		var tohmtl = tohmtl + '<p>Projekt/Anställningar</p><label><input type="text" id="projektinput"><i class="fas fa-plus-square fa-3x" onclick="addprojekt();"></i></label>';
+		var tohmtl = tohmtl + '<p>Projekt/Anställningar</p><div class="divtable"><div class="divline"><div class="divruta"><input type="text" id="projektinput"></div><div class="divruta"><i class="fas fa-plus-square fa-3x" onclick="addprojekt();"></i></div></div></div>';
 		var tohmtl = tohmtl + '<table><tbody id="projektlista">';
 		var tohmtl = tohmtl + tablecontent + '</tbody></table>';
 		return tohmtl;
@@ -394,7 +391,7 @@ app.engine('html', function (filePath, options, callback) {
 	// Döljer eller visar kod som skickas till server i url
 	if(!param.hidelink){var hidelinkscript = '';}else{var hidelinkscript = '<script type="text/javascript">history.pushState(null, \'\', location.href.split(\'?\')[0]);</script>';};
     var rendered = content.toString()
-    	.replace('#head#', '<!DOCTYPE html><html><head><title>TidLogga</title>' + hidelinkscript + '<meta http-equiv="Content-Type" content="text/html; charset=UTF-8"><meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1"><meta content="yes" name="apple-mobile-web-app-capable"><meta content="yes" name="mobile-web-app-capable"><meta content="minimum-scale=1.0, width=device-width, maximum-scale=0.6667, user-scalable=no" name="viewport"><meta name="apple-mobile-web-app-status-bar-style" content="black"><link rel="shortcut icon" href="' + param.link.icons + 'icon.ico"><link rel="icon" type="image/vnd.microsoft.icon" href="' + param.link.icons + 'icon.ico"><link rel="icon" type="image/png" href="' + param.link.icons + 'icon196x196.png"><link rel="apple-touch-icon-precomposed" href="' + param.link.icons + 'icon180x180.png"><link rel="apple-touch-icon-precomposed" sizes="76x76" href="' + param.link.icons + 'icon76x76.png"><link rel="apple-touch-icon-precomposed" sizes="120x120" href="' + param.link.icons + 'icon120x120.png"><link rel="apple-touch-icon-precomposed" sizes="152x152" href="' + param.link.icons + 'icon152x152.png"><link rel="stylesheet" href="' + param.link.style + 'font-awesome/css/fontawesome-all.css"><link rel="stylesheet" href="' + param.link.style + 'main.css"><script type="application/javascript" src="' + param.link.script + 'main.js"></script>')
+    	.replace('#head#', '<!DOCTYPE html><html><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8"><title>TidLogga</title>' + hidelinkscript + '<meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1"><meta content="yes" name="apple-mobile-web-app-capable"><meta content="yes" name="mobile-web-app-capable"><meta content="minimum-scale=1.0, width=device-width, maximum-scale=0.6667, user-scalable=no" name="viewport"><meta name="apple-mobile-web-app-status-bar-style" content="black"><link rel="shortcut icon" href="' + param.link.icons + 'icon.ico"><link rel="icon" type="image/vnd.microsoft.icon" href="' + param.link.icons + 'icon.ico"><link rel="icon" type="image/png" href="' + param.link.icons + 'icon196x196.png"><link rel="apple-touch-icon-precomposed" href="' + param.link.icons + 'icon180x180.png"><link rel="apple-touch-icon-precomposed" sizes="76x76" href="' + param.link.icons + 'icon76x76.png"><link rel="apple-touch-icon-precomposed" sizes="120x120" href="' + param.link.icons + 'icon120x120.png"><link rel="apple-touch-icon-precomposed" sizes="152x152" href="' + param.link.icons + 'icon152x152.png"><link rel="stylesheet" href="' + param.link.style + 'font-awesome/css/fontawesome-all.css"><link rel="stylesheet" href="' + param.link.style + 'main.css"><script type="application/javascript" src="' + param.link.script + 'main.js"></script>')
     	.replace('#header#', '</head><body><div id="wrapper"><div id="head">TidLogga</div><div id="header" class="table"><div class="tr"><div id="namn" class="td" data-namn="' + options.namn + '" data-vgrid="' + options.vgrid + '">' + greeting + '</div>' + projektnamn + '</div></div>')
     	.replace('#footer#', '</div><div id="footer">2018&nbsp;©&nbsp;Mattias Lidbeck&nbsp;¦&nbsp;{<a href="https://www.teddyprojekt.tk/" alt="Länk till denna sida" onclick="internlink(this, event);">www.teddyprojekt.tk</a>}</div></body></html>')
     	.replace('#projektselect#', projektselect)
@@ -470,7 +467,6 @@ function checkinklock(mapp){
 };
 
 app.post('/nyanvandare*', function(req, res) {
-	console.log(req.body);
 	if(!req.body.anv || req.body.anv == '' || !req.body.fnamn || req.body.fnamn == '' || !req.body.enamn || req.body.enamn == ''){
 		res.redirect('/index.html');
 	}else{
@@ -485,7 +481,6 @@ app.post('/nyanvandare*', function(req, res) {
 	};
 });
 function rensaochsakra(vari){
-	console.log(vari);
 	return vari.replace(/[^A-Za-z0-9\s!?\u00C5\u00C4\u00D6\u00E5\u00E4\u00F6\u002D]/g,'');
 };
 app.post('/edit*', function(req, res) {
@@ -497,7 +492,6 @@ app.post('/edit*', function(req, res) {
 	res.redirect('/index.html?anv=' + req.query.anv + '&toshow=' + req.query.toshow + '&projektnamn=');
 });
 app.get('/laggtillprojekt*', function(req, res) {
-	console.log(req.query.laggtillprojekt);
 	var avandare = finduser(req.query.anv);
 	var userfolder = __dirname + '/' + param.link.users + avandare + '/';
 	makeDir.sync(userfolder + rensaochsakra(req.query.laggtillprojekt) + '/')
@@ -878,9 +872,7 @@ app.get(['/', '/index.html'], function (req, res) {
 			}else{
 				var todayfilename = datetofetch.split('-');
 			};
-			console.log(todayfilename);
 			var anvandare = vgrid + param.splacertoken + namn;
-			console.log(anvandare)
 			var allstuff = searchprojekt(projektmapp, usermapp);
 			var allaprojekt = []
 			for (var i = allstuff.length - 1; i >= 0; i--) {
@@ -889,7 +881,6 @@ app.get(['/', '/index.html'], function (req, res) {
 			var data = makejson(anvandare, todayfilename, allaprojekt);
 			res.render(toshow, {"vgrid": vgrid, "namn": namn, "projekt": projekt, "projektnamn": projektnamn, "statsrender": data, "statdate": todayfilename})
 		}else if(toshow == 'setting'){
-			console.log('Borde funka!');
 			res.render(toshow, {"vgrid": vgrid, "namn": namn, "projekt": projekt, "projektnamn": projektnamn})
 		}else{
 			res.render('index', {"vgrid": "", "namn": "", "projekt": "", "projektnamn": ""})
