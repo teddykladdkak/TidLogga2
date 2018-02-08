@@ -266,25 +266,17 @@ function alldatesfromtoday(json, today){
 	var dag = daysInMonth(parseInt(todaysplit[1]),parseInt(todaysplit[0]));
 	var alldates = [['Projekt']];
 	for (var i = 0; i < dag; i++){
-		alldates.push([(i + 1) + '/' + parseInt(todaysplit[1])]);
+		var topush = [(i + 1) + '/' + parseInt(todaysplit[1])];
+		for (var a = 0; a < json.length; a++){
+			topush.push(0);
+		};
+		alldates.push(topush);
 	};
 	for (var i = 0; i < json.length; i++){
 		alldates[0].push(json[i].projektnamn)
 		for (var a = 0; a < json[i].instamplingar.length; a++){
-			var instampdat = json[i].instamplingar[a].datum.split('-');
-			var dag = parseInt(instampdat[instampdat.length - 1]);
-			alldates[dag].push(Math.round(json[i].instamplingar[a].sammanlagdtid / 1000));
-		};
-	};
-	for (var i = 0; i < alldates.length; i++){
-	//for (var i = alldates.length - 1; i >= 0; i--) {
-		if(i == 0){}else{
-			if((alldates[0].length + 1) == alldates[i].length){}else{
-				var numbertoadd = (alldates[0].length) - alldates[i].length;
-				for (var a = 0; a < numbertoadd; a++){
-					alldates[i].push(0);
-				};
-			};
+			var datum = json[i].instamplingar[a].datum.split('-');
+			alldates[Math.round(datum[2])][i + 1] = Math.round(((json[i].instamplingar[a].sammanlagdtid / 1000) / 60) / 60);
 		};
 	};
 	var totext = '';
