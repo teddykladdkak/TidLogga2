@@ -273,10 +273,11 @@ function alldatesfromtoday(json, today){
 		for (var a = 0; a < json[i].instamplingar.length; a++){
 			var instampdat = json[i].instamplingar[a].datum.split('-');
 			var dag = parseInt(instampdat[instampdat.length - 1]);
-			alldates[dag].push((json[i].instamplingar[a].sammanlagdtid / 1000));
+			alldates[dag].push(Math.round(json[i].instamplingar[a].sammanlagdtid / 1000));
 		};
 	};
-	for (var i = alldates.length - 1; i >= 0; i--) {
+	for (var i = 0; i < alldates.length; i++){
+	//for (var i = alldates.length - 1; i >= 0; i--) {
 		if(i == 0){}else{
 			if((alldates[0].length + 1) == alldates[i].length){}else{
 				var numbertoadd = (alldates[0].length) - alldates[i].length;
