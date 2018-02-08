@@ -553,8 +553,13 @@ app.get('/download*', function (req, res) {
 			//json rapport
 			var html = makerapport(layout, anv, datum, projektnamn);
 		};
-		
-		res.send(html)
+		if(layout == 'json'){
+			console.log('JSONP');
+			res.jsonp(html)
+		}else{
+			console.log('HTML');
+			res.send(html)
+		};
 	};
 });
 
