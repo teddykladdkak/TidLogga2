@@ -286,6 +286,6 @@ i.disable:hover{
 #setting table, #setting table tr{
 	border-collapse: collapse;
 }
-#setting table td{
+#setting table td, #setting table th{
 	border: solid 2px #000;
 }

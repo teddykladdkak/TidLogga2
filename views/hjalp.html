@@ -1,0 +1,105 @@
+#head#
+<style type="text/css">
+	table th{
+		text-align: left;
+		font-size: 23px;
+	}
+	table td:first-child{
+		text-align: center;
+		font-size: 30px;
+	}
+	table i{
+		cursor: default;
+	}
+	table i:hover{
+		color: #000;
+	}
+</style>
+#header#
+<div id="setting">
+	#tillbakaknapp#
+	<br/>
+	<table>
+		<thead>
+			<tr>
+				<th>Ikon</th>
+				<th>Beskrivning</th>
+			</tr>
+		</thead>
+		<tbody>
+			<tr>
+				<td>#iconstart#fas fa-sign-in-alt#iconextra##iconend#</td>
+				<td>Knappen för "Logga in".</td>
+			</tr>
+			<tr>
+				<td>#iconstart#fas fa-user-plus#iconextra##iconend#</td>
+				<td>Kappen för "Ny användare". Här har du möjlighet att skapa ett konto. Om något blir fel kan du ändra namn, id m.m. senare i Inställnings vyn (#iconstart#fas fa-cog#iconextra##iconend#).</td>
+			</tr>
+			<tr>
+				<td>#iconstart#fas fa-stopwatch#iconextra##iconend#</td>
+				<td>Till klockvyn. OBS du måste välja projekt!. Där användare har möjlighet att kocka in (#iconstart#fas fa-play#iconextra##iconend#) och ut (#iconstart#fas fa-stop#iconextra##iconend#).</td>
+			</tr>
+			<tr>
+				<td>#iconstart#far fa-list-alt#iconextra##iconend#</td>
+				<td>Lista för specifikt projekts loggningar under månaden. OBS du måste välja projekt!. Möjlighet att justera (#iconstart#fas fa-edit#iconextra##iconend#) eller ta bort (#iconstart#fas fa-trash-alt#iconextra##iconend#) in- eller utklockningar.</td>
+			</tr>
+			<tr>
+				<td>#iconstart#fas fa-print#iconextra##iconend#</td>
+				<td>Tidrapport vyn. Här möjlighet att sammanställa månadens in- och utklockningar till en Tidrapport, i olika utformning. Möjlighet att exkludera projekt du inte vill ha med i Tidrapporten.</td>
+			</tr>
+			<tr>
+				<td>#iconstart#fas fa-chart-pie#iconextra##iconend#</td>
+				<td>Statistik vyn. Här får du som användare en sammanställning i diagram och tabeller vad du lagt ner mest tid på under månaden. Pajdiagrammet visar i procent hur mycket tid i vart projekt du lagt ner. Tabellen visar i timmar hur mycket du jobbat per dag och stapeln visar i färg i procent hur mycket av den tiden du lagt på specifikt projekt.</td>
+			</tr>
+			<tr>
+				<td>#iconstart#fas fa-cog#iconextra##iconend#</td>
+				<td>Inställnings vyn. Här har du möjlighet att ändra namn, id. Lägga till projekt (#iconstart#fas fa-plus-square#iconextra##iconend#), ändra namn (#iconstart#fas fa-edit#iconextra##iconend#) på projekt och slutligen dölja (#iconstart#fas fa-eye#iconextra##iconend#) projekt. Projekt går inte att tas bort efter dom är skapade, genom att dölja (#iconstart#fas fa-eye#iconextra##iconend#) försvinner projektet från TidLoggans menyer m.m. men sammanställs fortfarande i tidrapport och statistik, detta är en säkerhetsfråga så du som användare inte råkar ta bort ett helt projekt.</td>
+			</tr>
+			<tr>
+				<td>#iconstart#fas fa-play#iconextra##iconend#</td>
+				<td>Startar tid. Om grå är knappen inte aktiv, vilket innebär att kockan nog redan är igång. Startar tiden direkt, alternativt tar dig till en separat vy ifall du valt "Annan tid".</td>
+			</tr>
+			<tr>
+				<td>#iconstart#fas fa-stop#iconextra##iconend#</td>
+				<td>Stoppar tid. Om grå är knappen inte aktiv, vilket innebär att kockan inte är startad. Stoppar tiden direkt, alternativt tar dig till en separat vy ifall du valt "Annan tid".</td>
+			</tr>
+			<tr>
+				<td>#iconstart#fas fa-check-circle#iconextra##iconend#</td>
+				<td>Knappen för "Ja", "OK" eller "Skicka". Den innebär att du accepterar eller vill göra någon typ av förändring.</td>
+			</tr>
+			<tr>
+				<td>#iconstart#fas fa-times-circle#iconextra##iconend#</td>
+				<td>Knappen för "Nej", "Avbryt", "Ångra". Den tar dig tillbaka till föregående vy, utan att något förändras.</td>
+			</tr>
+			<tr>
+				<td>#iconstart#fas fa-trash-alt#iconextra##iconend#</td>
+				<td>Tar bort! Denna knapp finns enbart i Loggnings redigeraren (#iconstart#far fa-list-alt#iconextra##iconend#). Tar bort aktuell in- och utklockning.</td>
+			</tr>
+			<tr>
+				<td>#iconstart#fas fa-edit#iconextra##iconend#</td>
+				<td>Knappen för "Redigera". Finns på olika platser i TidLoggan och ger dig möjlighet att redigera tid, namn m.m. mer specifikt. Tar dig till ett nytt fönster/vy där du persenteras med text eller andra typer av fönster att justera. Du gör förändring genom att klicka på "OK" (#iconstart#fas fa-check-circle#iconextra##iconend#), eller för att inte göra någon förändring klickar du på "Ångra" (#iconstart#fas fa-times-circle#iconextra##iconend#).</td>
+			</tr>
+			<tr>
+				<td>#iconstart#fas fa-arrow-circle-left#iconextra##iconend#</td>
+				<td>Primärt knappen för "Tillbaka". Finns oftast högst uppe till vänster i rutan. Ersätts av "OK" (#iconstart#fas fa-check-circle#iconextra##iconend#) eller "Avbryt" (#iconstart#fas fa-times-circle#iconextra##iconend#). I Statistik vyn (#iconstart#fas fa-chart-pie#iconextra##iconend#), aggerar knappen bakåt i tiden.</td>
+			</tr>
+			<tr>
+				<td>#iconstart#fas fa-arrow-circle-right#iconextra##iconend#</td>
+				<td>I Statistik vyn (#iconstart#fas fa-chart-pie#iconextra##iconend#), aggerar knappen för frammåt i tiden.</td>
+			</tr>
+			<tr>
+				<td>#iconstart#fas fa-plus-square#iconextra##iconend#</td>
+				<td>Knappen för "Lägg till". I Inställnings vyn (#iconstart#fas fa-cog#iconextra##iconend#), lägger den till projekt du fyllt i textruta brevid.</td>
+			</tr>
+			<tr>
+				<td>#iconstart#fas fa-eye#iconextra##iconend#</td>
+				<td>I Inställnings vyn (#iconstart#fas fa-cog#iconextra##iconend#), knappen visar att projektet inte är doldt. Om användare klickar på ögat döljs projektet och ikonen ändras till "dold" (#iconstart#fas fa-eye-slash#iconextra##iconend#). OBS projektet kan i detta läge inte justeras (#iconstart#fas fa-edit#iconextra##iconend#), ex. ändra namn m.m. Projektet kommer nu inte synas i TidLoggan förutom i Statistik vyn (#iconstart#fas fa-chart-pie#iconextra##iconend#) och Rapport vyn (#iconstart#fas fa-print#iconextra##iconend#).</td>
+			</tr>
+			<tr>
+				<td>#iconstart#fas fa-eye-slash#iconextra##iconend#</td>
+				<td>I Inställnings vyn (#iconstart#fas fa-cog#iconextra##iconend#), knappen visar att projektet är doldt. Om användare klickar på ögat visas projektet och ikonen ändras till "visas" (#iconstart#fas fa-eye#iconextra##iconend#)</td>
+			</tr>
+		</tbody>
+	</table>
+</div>
+#footer#

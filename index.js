@@ -205,7 +205,7 @@ function htmlprojektnamn(url, projektnamn){
 		var prittyurl = spliturl[spliturl.length - 1];
 		var spliturltwo = url.split('/');
 		var prittyurltwo = spliturltwo[spliturltwo.length - 1];
-		if(prittyurl == 'login.html' || prittyurl == 'rapport.html' || prittyurl == 'stat.html' || prittyurl == 'setting.html' || prittyurltwo == 'login.html' || prittyurltwo == 'rapport.html' || prittyurltwo == 'stat.html' || prittyurltwo == 'setting.html'){
+		if(prittyurl == 'login.html' || prittyurl == 'rapport.html' || prittyurl == 'stat.html' || prittyurl == 'setting.html' || prittyurl == 'hjalp.html' || prittyurltwo == 'login.html' || prittyurltwo == 'rapport.html' || prittyurltwo == 'stat.html' || prittyurltwo == 'setting.html' || prittyurltwo == 'hjalp.html'){
 			return '<div id="projektnamn" class="td" data-projektnamn="' + projektnamn + '"></div>';
 		}else{
 			return '<div id="projektnamn" class="td" data-projektnamn="' + projektnamn + '">' + projektnamn + '</div>';
@@ -309,7 +309,7 @@ function statstohtml(statdata, datum){
 		return '';
 	}else{
 		var preandnext = monthbeforeandafter(datum.join('-'));
-		var tohtml = '<div class="center"><table><tbody><tr><td>#iconstart#fas fa-chevron-left fa-3x#iconextra#onclick="nextpie(\'' + preandnext.prev + '\')"#iconend#</td><td id="piedatum">' + datum.join('-') + '</td><td>#iconstart#fas fa-chevron-right fa-3x#iconextra#onclick="nextpie(\'' + preandnext.next + '\')"#iconend#</td></tr></tbody></table></div>';
+		var tohtml = '<div class="center"><table><tbody><tr><td>#iconstart#fas fa-arrow-circle-left fa-3x#iconextra#onclick="nextpie(\'' + preandnext.prev + '\')"#iconend#</td><td id="piedatum">' + datum.join('-') + '</td><td>#iconstart#fas fa-arrow-circle-right fa-3x#iconextra#onclick="nextpie(\'' + preandnext.next + '\')"#iconend#</td></tr></tbody></table></div>';
 		var tohtml = tohtml + '<div id="detalj" class="center"><table id="detaljtable"><tbody>';
 		var sammanmanad = 0;
 		var chartData = ['["Projekt", "Tid i Millisekunder"]'];
@@ -768,7 +768,9 @@ function searchprojekt(projektmapp, usermapp){
 app.get(['/', '/index.html'], function (req, res) {
 	var anv = req.query.anv;
 	var checkanv = finduser(anv);
-	if(!anv || anv == ''){
+	if(req.query.toshow == 'hjalpstart'){
+		res.render('hjalp', {"vgrid": "", "namn": "", "projekt": "", "projektnamn": ""})
+	}else if(!anv || anv == ''){
 		res.render('index', {"vgrid": "", "namn": "", "projekt": "", "projektnamn": ""})
 	}else if(!checkanv){
 		res.redirect('/index.html');
@@ -785,7 +787,7 @@ app.get(['/', '/index.html'], function (req, res) {
 		var starttime = req.query.starttime;
 		var stoptime = req.query.stoptime;
 		var datetofetch = req.query.datetofetch;
-		if(toshow == 'login'){
+		if(toshow == 'login' || toshow == 'hjalp'){
 			res.render(toshow, {"vgrid": vgrid, "namn": namn, "projekt": projekt, "projektnamn": projektnamn})
 		}else if(toshow == 'klocka'){
 			if(!starttime){

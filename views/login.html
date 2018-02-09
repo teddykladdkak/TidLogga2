@@ -8,7 +8,7 @@
 		#iconstart#fas fa-print fa-4x#iconextra#onclick="oppnasida('rapport');"#iconend#
 		#iconstart#fas fa-chart-pie fa-4x#iconextra#onclick="oppnasida('stat');"#iconend#
 		#iconstart#fas fa-cog fa-4x#iconextra#onclick="oppnasida('setting');"#iconend#
-		<!-- <i class="fa fa-user-plus fa-4x" aria-hidden="true" onclick="admin();"></i></div> -->
+		#iconstart#fas fa-question-circle fa-4x#iconextra#onclick="oppnasida('hjalp');"#iconend#
 	</div>
 </div>
 <script type="text/javascript">
@@ -22,7 +22,7 @@
 				window.open(encodeURI('/index.html?anv=' + anv + '&toshow=' + todo + '&projektnamn=' + projekt),'_self')
 			};
 		}else{
-			if(todo == 'rapport' || todo == 'stat' || todo == 'setting'){
+			if(todo == 'rapport' || todo == 'stat' || todo == 'setting' || todo == 'hjalp'){
 				window.open(encodeURI('/index.html?anv=' + anv + '&toshow=' + todo + '&projektnamn=' + projekt),'_self')
 			};
 		};
