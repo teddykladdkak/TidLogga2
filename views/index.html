@@ -108,7 +108,6 @@
 	};
 	load();
 	function startascan(element){
-		element.setAttribute('class', element.getAttribute('class') + ' activebutton');
 		var wrapper = document.getElementById('login');
 			var videoelem = document.createElement('video');
 				videoelem.setAttribute('id', 'preview');
@@ -120,6 +119,7 @@
 			});
 		Instascan.Camera.getCameras().then(function (cameras) {
 			if (cameras.length > 0) {
+				element.setAttribute('class', element.getAttribute('class') + ' activebutton');
 				scanner.start(cameras[0]);
 			} else {
 				console.error('No cameras found.');
