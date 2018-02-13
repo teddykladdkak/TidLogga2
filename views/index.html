@@ -1,4 +1,22 @@
 #head#
+<script type="text/javascript" src="https://www.teddyprojekt.tk/projekt/komochga/instascan.min.js"></script>
+<style type="text/css">
+	.activebutton {
+	  animation: pulse 2s infinite;
+	}
+
+	@keyframes pulse {
+	  0% {
+	    color: blue;
+	  }
+	  50% {
+	    color: red;
+	  }
+	  100% {
+	    color: blue;
+	  }
+	}
+</style>
 #header#
 <div id="login">
 	<div class="divtable">
@@ -16,6 +34,7 @@
 		</div>
 	</div><br/><br/>
 		#iconstart#fas fa-user-plus fa-5x#iconextra# onclick="showhide('login', 'nyanvandare');"#iconend#
+		#iconstart#fas fa-qrcode fa-5x#iconextra# onclick="startascan(this);"#iconend#
 		#iconstart#fas fa-question-circle fa-5x#iconextra#onclick="oppnasida('hjalpstart');"#iconend#
 		<br>
 	<p>Vill du testa? Använd: "test3".</p>
@@ -35,7 +54,7 @@
 </div>
 <script type="text/javascript">
 	function oppnasida(todo){
-		window.open(encodeURI('/index.html?&toshow=hjalpstart'),'_self')
+		window.open(encodeURI('/index.html?&toshow=' + todo),'_self')
 	};
 	function nyanvandare(){
 		document.getElementById('subnyanv').click();
@@ -45,9 +64,13 @@
 			document.getElementById(id).click();
 		};
 	};
-	function loggain(){
+	function loggain(sendanv){
 		checkifsave();
-		var anv = document.getElementById('idnamn').value;
+		if(!sendanv){
+			var anv = document.getElementById('idnamn').value;
+		}else{
+			var anv = sendanv;
+		};
 		if(anv == ''){}else{
 			window.open(encodeURI('/index.html?anv=' + anv + '&toshow=login'),'_self')
 		};
@@ -84,5 +107,26 @@
 		checksave();
 	};
 	load();
+	function startascan(element){
+		element.setAttribute('class', element.getAttribute('class') + ' activebutton');
+		var wrapper = document.getElementById('login');
+			var videoelem = document.createElement('video');
+				videoelem.setAttribute('id', 'preview');
+				videoelem.setAttribute('style', 'display: none;');
+			wrapper.appendChild(videoelem);
+		let scanner = new Instascan.Scanner({ video: document.getElementById('preview') });
+			scanner.addListener('scan', function (content) {
+				loggain(content)
+			});
+		Instascan.Camera.getCameras().then(function (cameras) {
+			if (cameras.length > 0) {
+				scanner.start(cameras[0]);
+			} else {
+				console.error('No cameras found.');
+			}
+		}).catch(function (e) {
+			console.error(e);
+		});
+	};
 </script>
 #footer#
