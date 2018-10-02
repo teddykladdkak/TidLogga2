@@ -217,18 +217,23 @@ function rapporttohtml(rapport){
 	var skrivutdatum = '<select id="skrivutdatum">';
 	var idexofdates = [];
 	if(!rapport){return false;}else{
+		rapport.sort();
 		for (var i = rapport.length - 1; i >= 0; i--) {
 			if(!rapport[i].namn.indexOf(param.oldprojekt) == 0){
 				var printcheckboxes = printcheckboxes + '<span class="checkboxwrapper"><input type="checkbox" data-namn="' + rapport[i].namn + '" checked><lable>' + rapport[i].namn + '</lable></span>';
-				for (var a = rapport[i].datum.length - 1; a >= 0; a--) {
+				rapport[i].datum.sort();
+				for (var a = 0; a < rapport[i].datum.length; a++){
 					var prittydate = rapport[i].datum[a].replace('.json', '');
 					if(idexofdates.indexOf(prittydate) == -1){
 						idexofdates.push(prittydate);
-						var skrivutdatum = skrivutdatum + '<option value="' + prittydate + '">' + prittydate + '</option>';
 					};
 				};
 			};
 		};
+	};
+	idexofdates.sort();
+	for (var i = idexofdates.length - 1; i >= 0; i--) {
+		var skrivutdatum = skrivutdatum + '<option value="' + idexofdates[i] + '">' + idexofdates[i] + '</option>';
 	};
 	var printcheckboxes = printcheckboxes + '</div><br>';
 	var skrivutdatum = skrivutdatum + '</select><br>';
