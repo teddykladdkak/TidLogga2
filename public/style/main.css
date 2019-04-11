@@ -215,6 +215,9 @@ td{
 	.divruta label{
 		display: none;
 	}
+	select {
+		height: 40px;
+	}
 	#projekt select, input[type=text], input[type=button], input[type=date], input[type=time]{
 		width: 100%;
 		margin: 0px;
