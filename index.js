@@ -357,7 +357,7 @@ function settingtohtml(vgrid, namn, projekt){
 		var visa = []
 		for (var a = 0; a < projekt.length; a++){
 			if(!projekt[a].indexOf(param.oldprojekt) == 0){
-				var tablecontent = tablecontent + '<tr><td><p>' + projekt[a] + '</p></td><td>' + editiconone + '" onclick="edit(this);' + editicontwo + '</td><td>' + showiconone + '" onclick="togglesynlig(this);' + showicontwo + '</td></tr>';
+				var tablecontent = tablecontent + '<tr><td><p>' + projekt[a] + '</p></td><td>' + editiconone + '" onclick="edit(this);' + editicontwo + '</td><td>' + showiconone + '" data-synlig="true" onclick="togglesynlig(this);' + showicontwo + '</td></tr>';
 			}else{
 				var tablecontent = tablecontent + '<tr><td><p>' + projekt[a].replace(param.oldprojekt, '') + '</p></td><td>' + editiconone + '" class="disable' + editicontwo + '</td><td>' + hideiconone + '" data-synlig="false" onclick="togglesynlig(this);' + hideicontwo + '</td></tr>';
 			};
