@@ -48,16 +48,43 @@ body {
 		text-align: right;
 	}
 }
-i{
+svg {
+	display: inline-block;
 	cursor: pointer;
+	margin: 5px;
+	-webkit-transition: all 200ms linear;
+    -moz-transition: all 200ms linear;
+    -o-transition: all 200ms linear;
+    -ms-transition: all 200ms linear;
+    transition: all 200ms linear;
 }
-i.disable{
+svg:hover{
+	color: blue;
+}
+svg.disable{
 	cursor: not-allowed;
+}
+#login svg, #skrivut svg {
+	width: 100px;
+	height: 100px;
+}
+svg#sparaknapp {
+	width: 30px;
+	height: 30px;
+}
+#editprojekt svg, #setting svg, #skrivut svg.backbutton, svg.backbutton, #klocka svg, #klockaannantid svg, #loggwrapper td svg, #loggedit svg, #statistik table svg {
+	width: 60px;
+	height: 60px;
+}
+#klocka .checkboxwrapper svg {
+	width: 20px;
+	height: 20px;
 }
 input, select {
 	zoom: 1.5;
+	box-sizing : border-box;
 }
-i, input, select, #klockadata, p {
+svg, input, select, #klockadata, p {
 	margin: 5px;
 }
 #login, #projekt, #klocka, #klockaannantid, #loggwrapper, #loggedit, #skrivut, #statistik, #pengar, #setting, #editprojekt, #nyanvandare{
@@ -97,9 +124,6 @@ i, input, select, #klockadata, p {
 #skrivutpapper table td{
 	vertical-align: middle;
 }
-i:hover{
-	color: blue;
-}
 .center{
 	display: flex;
 	align-items: center;
@@ -109,13 +133,6 @@ i:hover{
 	display: flex;
 	align-items: left;
 	justify-content: left;
-}
-i{
-	-webkit-transition: all 200ms linear;
-    -moz-transition: all 200ms linear;
-    -o-transition: all 200ms linear;
-    -ms-transition: all 200ms linear;
-    transition: all 200ms linear;
 }
 #buttonwrapper{
 	text-align: center;
@@ -141,9 +158,17 @@ i{
 	padding-right: 5px;
 	padding-left: 5px;
 }
+#projekt svg {
+	width: 80px;
+	height: 80px;
+}
 @media screen and (min-width: 650px) {
 	#projekt i{
 		font-size: 7em!important;
+	}
+	#projekt svg {
+		width: 140px;
+		height: 140px;
 	}
 }
 #klockadata {
@@ -158,6 +183,10 @@ td{
 @media screen and (min-width: 500px) {
 	#klockadata, p{
 		font-size: 25px;
+	}
+	#klocka .checkboxwrapper svg {
+		width: 25px;
+		height: 25px;
 	}
 	td {
 		font-size: 20px;
@@ -184,7 +213,8 @@ td{
 		display: none;
 	}
 	#projekt select, input[type=text], input[type=button], input[type=date], input[type=time]{
-		width: 88%;
+		width: 100%;
+		margin: 0px;
 	}
 	.center{
 		display: inline-block;
@@ -216,7 +246,7 @@ td{
 .disable{
 	opacity: 0.5;
 }
-i.disable:hover{
+svg.disable:hover{
 	color: #000;
 }
 #klockadata{
@@ -266,7 +296,7 @@ i.disable:hover{
     opacity:0.8;
     z-index:1001;
 }
-.fa-toggle-on, .fa-toggle-on:hover {
+.green, .green:hover {
 	color: green;
 }
 #footer{
@@ -276,6 +306,7 @@ i.disable:hover{
 	left: 0;
 	padding: 1rem;
 	text-align: center;
+	font-size: 10px;
 }
 #footer a, #footer a:hover{
 	color: #000;

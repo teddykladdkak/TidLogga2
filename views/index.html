@@ -4,7 +4,6 @@
 	.activebutton {
 	  animation: pulse 2s infinite;
 	}
-
 	@keyframes pulse {
 	  0% {
 	    color: blue;
@@ -25,17 +24,16 @@
 				<input type="text" id="idnamn" onkeydown="checkkey(event, 'loginbutton');" name="anv" placeholder="ID">
 				<span id="namnstatus"></span><br>
 				<p>
-					#iconstart#fas fa-toggle-off fa-1x#iconextra#data-state="off" id="sparaknapp" onclick="changespara(this, &quot;on&quot;);"#iconend#
-						 Spara användarnamn</p>
+					#svgstart#0 0 576 512" data-state="off" id="sparaknapp" onclick="changespara(this, &quot;on&quot;);"#svginside#M384 64H192C85.961 64 0 149.961 0 256s85.961 192 192 192h192c106.039 0 192-85.961 192-192S490.039 64 384 64zM64 256c0-70.741 57.249-128 128-128 70.741 0 128 57.249 128 128 0 70.741-57.249 128-128 128-70.741 0-128-57.249-128-128zm320 128h-48.905c65.217-72.858 65.236-183.12 0-256H384c70.741 0 128 57.249 128 128 0 70.74-57.249 128-128 128z#svgend# Spara användarnamn</p>
 			</div>
 			<div class="divruta">
-				#iconstart#fas fa-sign-in-alt fa-5x#iconextra#id="loginbutton" onclick="loggain();"#iconend#
+				#svgstart#0 0 512 512" id="loginbutton" onclick="loggain();#svginside#M416 448h-84c-6.6 0-12-5.4-12-12v-40c0-6.6 5.4-12 12-12h84c17.7 0 32-14.3 32-32V160c0-17.7-14.3-32-32-32h-84c-6.6 0-12-5.4-12-12V76c0-6.6 5.4-12 12-12h84c53 0 96 43 96 96v192c0 53-43 96-96 96zm-47-201L201 79c-15-15-41-4.5-41 17v96H24c-13.3 0-24 10.7-24 24v96c0 13.3 10.7 24 24 24h136v96c0 21.5 26 32 41 17l168-168c9.3-9.4 9.3-24.6 0-34z#svgend#
 			</div>
 		</div>
 	</div><br/><br/>
-		#iconstart#fas fa-user-plus fa-5x#iconextra# onclick="showhide('login', 'nyanvandare');"#iconend#
-		#iconstart#fas fa-qrcode fa-5x#iconextra#id="qrbutton" onclick="startascan(this);"#iconend#
-		#iconstart#fas fa-question-circle fa-5x#iconextra#onclick="oppnasida('hjalpstart');"#iconend#
+		#svgstart#0 0 640 512" onclick="showhide('login', 'nyanvandare');#svginside#M624 208h-64v-64c0-8.8-7.2-16-16-16h-32c-8.8 0-16 7.2-16 16v64h-64c-8.8 0-16 7.2-16 16v32c0 8.8 7.2 16 16 16h64v64c0 8.8 7.2 16 16 16h32c8.8 0 16-7.2 16-16v-64h64c8.8 0 16-7.2 16-16v-32c0-8.8-7.2-16-16-16zm-400 48c70.7 0 128-57.3 128-128S294.7 0 224 0 96 57.3 96 128s57.3 128 128 128zm89.6 32h-16.7c-22.2 10.2-46.9 16-72.9 16s-50.6-5.8-72.9-16h-16.7C60.2 288 0 348.2 0 422.4V464c0 26.5 21.5 48 48 48h352c26.5 0 48-21.5 48-48v-41.6c0-74.2-60.2-134.4-134.4-134.4z#svgend#
+		#svgstart#0 0 448 512" id="qrbutton" onclick="startascan(this);#svginside#M0 224h192V32H0v192zM64 96h64v64H64V96zm192-64v192h192V32H256zm128 128h-64V96h64v64zM0 480h192V288H0v192zm64-128h64v64H64v-64zm352-64h32v128h-96v-32h-32v96h-64V288h96v32h64v-32zm0 160h32v32h-32v-32zm-64 0h32v32h-32v-32z#svgend#
+		#svgstart#0 0 512 512" onclick="oppnasida('hjalpstart');#svginside#M504 256c0 136.997-111.043 248-248 248S8 392.997 8 256C8 119.083 119.043 8 256 8s248 111.083 248 248zM262.655 90c-54.497 0-89.255 22.957-116.549 63.758-3.536 5.286-2.353 12.415 2.715 16.258l34.699 26.31c5.205 3.947 12.621 3.008 16.665-2.122 17.864-22.658 30.113-35.797 57.303-35.797 20.429 0 45.698 13.148 45.698 32.958 0 14.976-12.363 22.667-32.534 33.976C247.128 238.528 216 254.941 216 296v4c0 6.627 5.373 12 12 12h56c6.627 0 12-5.373 12-12v-1.333c0-28.462 83.186-29.647 83.186-106.667 0-58.002-60.165-102-116.531-102zM256 338c-25.365 0-46 20.635-46 46 0 25.364 20.635 46 46 46s46-20.636 46-46c0-25.365-20.635-46-46-46z#svgend#
 		<br>
 	<p>Vill du testa? Använd: "test3".</p>
 </div>
@@ -77,13 +75,17 @@
 	};
 	function changespara(element, todo){
 		if(todo == "on"){
-			element.setAttribute('class', element.getAttribute('class').replace('off', 'on'));
 			element.setAttribute('data-state', 'on');
+			element.setAttribute('class', 'green');
+			element.setAttribute('viewBox', '0 0 576 512');
 			element.setAttribute('onclick', 'changespara(this, "off");');
+			element.getElementsByTagName('path')[0].setAttribute('d', 'M384 64H192C86 64 0 150 0 256s86 192 192 192h192c106 0 192-86 192-192S490 64 384 64zm0 320c-70.8 0-128-57.3-128-128 0-70.8 57.3-128 128-128 70.8 0 128 57.3 128 128 0 70.8-57.3 128-128 128z')
 		}else{
-			element.setAttribute('class', element.getAttribute('class').replace('on', 'off'));
 			element.setAttribute('data-state', 'off');
+			element.removeAttribute('class');
+			element.setAttribute('viewBox', '0 0 576 512');
 			element.setAttribute('onclick', 'changespara(this, "on");');
+			element.getElementsByTagName('path')[0].setAttribute('d', 'M384 64H192C85.961 64 0 149.961 0 256s85.961 192 192 192h192c106.039 0 192-85.961 192-192S490.039 64 384 64zM64 256c0-70.741 57.249-128 128-128 70.741 0 128 57.249 128 128 0 70.741-57.249 128-128 128-70.741 0-128-57.249-128-128zm320 128h-48.905c65.217-72.858 65.236-183.12 0-256H384c70.741 0 128 57.249 128 128 0 70.74-57.249 128-128 128z')
 		};
 	};
 	function checksave(){

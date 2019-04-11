@@ -4,8 +4,9 @@
 	<form action="/andranamn.html#defaultdata#" method="post">
 		#settingform#
 		<input type="submit" value="Skicka" id="formbutton" style="display: none;">
-		#iconstart#fas fa-check-circle fa-4x#iconextra#onclick="post();"#iconend#
-		#iconstart#fas fa-times-circle fa-4x#iconextra#onclick="tillbakatillprojekt();"#iconend#
+		#svgstart#0 0 512 512" onclick="post();#svginside#M504 256c0 136.967-111.033 248-248 248S8 392.967 8 256 119.033 8 256 8s248 111.033 248 248zM227.314 387.314l184-184c6.248-6.248 6.248-16.379 0-22.627l-22.627-22.627c-6.248-6.249-16.379-6.249-22.628 0L216 308.118l-70.059-70.059c-6.248-6.248-16.379-6.248-22.628 0l-22.627 22.627c-6.248 6.248-6.248 16.379 0 22.627l104 104c6.249 6.249 16.379 6.249 22.628.001z#svgend#
+	
+		#svgstart#0 0 512 512" onclick="tillbakatillprojekt();#svginside#M256 8C119 8 8 119 8 256s111 248 248 248 248-111 248-248S393 8 256 8zm121.6 313.1c4.7 4.7 4.7 12.3 0 17L338 377.6c-4.7 4.7-12.3 4.7-17 0L256 312l-65.1 65.6c-4.7 4.7-12.3 4.7-17 0L134.4 338c-4.7-4.7-4.7-12.3 0-17l65.6-65-65.6-65.1c-4.7-4.7-4.7-12.3 0-17l39.6-39.6c4.7-4.7 12.3-4.7 17 0l65 65.7 65.1-65.6c4.7-4.7 12.3-4.7 17 0l39.6 39.6c4.7 4.7 4.7 12.3 0 17L312 256l65.6 65.1z#svgend#
 	</form>
 </div>
 <div id="editprojekt" style="display: none;">
@@ -14,8 +15,9 @@
 		<input type="text" name="oldprojektname" style="display: none;">
 		<input type="text" name="newprojektname">
 		<input type="submit" value="Ändra namn" id="andranamn" style="display: none;"><br/>
-		#iconstart#fas fa-check-circle fa-4x#iconextra#onclick="andranamn();"#iconend#
-		#iconstart#fas fa-times-circle fa-4x#iconextra#onclick="showhide('editprojekt', 'setting');"#iconend#
+		#svgstart#0 0 512 512" onclick="andranamn();#svginside#M504 256c0 136.967-111.033 248-248 248S8 392.967 8 256 119.033 8 256 8s248 111.033 248 248zM227.314 387.314l184-184c6.248-6.248 6.248-16.379 0-22.627l-22.627-22.627c-6.248-6.249-16.379-6.249-22.628 0L216 308.118l-70.059-70.059c-6.248-6.248-16.379-6.248-22.628 0l-22.627 22.627c-6.248 6.248-6.248 16.379 0 22.627l104 104c6.249 6.249 16.379 6.249 22.628.001z#svgend#
+	
+		#svgstart#0 0 512 512" onclick="showhide('editprojekt', 'setting');#svginside#M256 8C119 8 8 119 8 256s111 248 248 248 248-111 248-248S393 8 256 8zm121.6 313.1c4.7 4.7 4.7 12.3 0 17L338 377.6c-4.7 4.7-12.3 4.7-17 0L256 312l-65.1 65.6c-4.7 4.7-12.3 4.7-17 0L134.4 338c-4.7-4.7-4.7-12.3 0-17l65.6-65-65.6-65.1c-4.7-4.7-4.7-12.3 0-17l39.6-39.6c4.7-4.7 12.3-4.7 17 0l65 65.7 65.1-65.6c4.7-4.7 12.3-4.7 17 0l39.6 39.6c4.7 4.7 4.7 12.3 0 17L312 256l65.6 65.1z#svgend#
 	</form>
 </div>
 <script type="text/javascript">
@@ -37,39 +39,16 @@
 			var anv = document.getElementById('namn').getAttribute('data-vgrid');
 			window.open(encodeURI('/laggtillprojekt.html?anv=' + anv + '&toshow=setting&projektnamn=&laggtillprojekt=' + projektnamn),'_self')
 		};
-			/*var tr = document.createElement('tr');
-				var td = document.createElement('td');
-					var p = document.createElement('p');
-						var ptext = document.createTextNode(element.value);
-						p.appendChild(ptext)
-					td.appendChild(p)
-				tr.appendChild(td)
-				var edit = document.createElement('td');
-					var editicon = document.createElement('i');
-						editicon.setAttribute('class', 'fas fa-edit fa-3x')
-						editicon.setAttribute('onclick', 'edit(this);')
-					edit.appendChild(editicon)
-				tr.appendChild(edit)
-				var synlig = document.createElement('td');
-					var synligicon = document.createElement('i');
-						synligicon.setAttribute('class', 'fas fa-eye fa-3x')
-						synligicon.setAttribute('data-synlig', 'true')
-						synligicon.setAttribute('onclick', 'togglesynlig(this);')
-					synlig.appendChild(synligicon)
-				tr.appendChild(synlig)
-			document.getElementById('projektlista').appendChild(tr);
-		element.value = '';
-		searchforprojekts();*/
 	};
 	function togglesynlig(element){
 		var nuvarande = element.getAttribute('data-synlig');
 		if(nuvarande == "true"){
-			element.setAttribute('data-synlig', 'false');
-			element.setAttribute('class', 'fas fa-eye-slash fa-3x');
+			/*element.setAttribute('data-synlig', 'false');
+			element.setAttribute('class', 'fas fa-eye-slash fa-3x');*/
 			var todo = 'dolj';
 		}else{
-			element.setAttribute('data-synlig', 'true');
-			element.setAttribute('class', 'fas fa-eye fa-3x');
+			/*element.setAttribute('data-synlig', 'true');
+			element.setAttribute('class', 'fas fa-eye fa-3x');*/
 			var todo = 'visa';
 		}
 		var anv = document.getElementById('namn').getAttribute('data-vgrid');

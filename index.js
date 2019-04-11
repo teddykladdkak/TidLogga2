@@ -139,11 +139,15 @@ function htmlprojektselect(projekt, historyprojekt, namn, vgrid){
 	return tohtml;
 };
 function htmlstartstoptime(inklockad, starttime, stoptime){
+	var startone = '#svgstart#0 0 448 512" ';
+	var starttwo = '#svginside#M424.4 214.7L72.4 6.6C43.8-10.3 0 6.1 0 47.9V464c0 37.5 40.7 60.1 72.4 41.3l352-208c31.4-18.5 31.5-64.1 0-82.6z#svgend#';
+	var stopone = '#svgstart#0 0 448 512" ';
+	var stoptwo = '#svginside#M400 32H48C21.5 32 0 53.5 0 80v352c0 26.5 21.5 48 48 48h352c26.5 0 48-21.5 48-48V80c0-26.5-21.5-48-48-48z#svgend#';
 	// Vilka knappar som ska visas i inloggad
-		var utklockbuttons = '#iconstart#fas fa-play fa-3x in disable#iconextra##iconend##iconstart#fas fa-stop fa-3x ut enable#iconextra#onclick="stopclock(\'nu\');"#iconend#'
-		var utklockbuttonsannat = '#iconstart#fas fa-play in disable#iconextra##iconend##iconstart#fas fa-stop ut enable#iconextra#onclick="annantid(\'ut\')"#iconend#'
-		var inklockbuttons = '#iconstart#fas fa-play fa-3x in enable#iconextra#onclick="startclock(\'nu\')"#iconend##iconstart#fas fa-stop fa-3x ut disable#iconextra##iconend#'
-		var inklockbuttonsannat = '#iconstart#fas fa-play in enable#iconextra#onclick="annantid(\'in\')"#iconend##iconstart#fas fa-stop ut disable#iconextra##iconend#'
+		var utklockbuttons = startone + 'class="disable' + starttwo + stopone + 'class="enable" onclick="stopclock(\'nu\');' + stoptwo;
+		var utklockbuttonsannat = startone + 'class="disable' + starttwo + stopone + 'class="enable" onclick="stopclock="annantid(\'ut\');' + stoptwo;
+		var inklockbuttons = startone + 'class="enable" onclick="startclock(\'nu\')' + starttwo + stopone + 'class="disable' + stoptwo;
+		var inklockbuttonsannat = startone + 'class="enable" onclick="annantid(\'in\')' + starttwo + stopone + 'class="disable' + stoptwo;
 		var timecount = '';
 	if(!activevar(inklockad)){
 		//Person är inte inte inklockad
@@ -170,6 +174,8 @@ function htmlstartstoptime(inklockad, starttime, stoptime){
 };
 function valkommenhtml(namn){if(activevar(namn)){var greeting = 'Välkommen ' + namn;}else{var greeting = '';};return greeting;};
 function htmltidloggningar(loggningar){
+	var tabort = '#svgstart#0 0 448 512" onclick="removesegment(this);#svginside#M32 464a48 48 0 0 0 48 48h288a48 48 0 0 0 48-48V128H32zm272-256a16 16 0 0 1 32 0v224a16 16 0 0 1-32 0zm-96 0a16 16 0 0 1 32 0v224a16 16 0 0 1-32 0zm-96 0a16 16 0 0 1 32 0v224a16 16 0 0 1-32 0zM432 32H312l-9.4-18.7A24 24 0 0 0 281.1 0H166.8a23.72 23.72 0 0 0-21.4 13.3L136 32H16A16 16 0 0 0 0 48v32a16 16 0 0 0 16 16h416a16 16 0 0 0 16-16V48a16 16 0 0 0-16-16z#svgend#';
+	var redigera = '#svgstart#0 0 576 512" onclick="showedit(this);#svginside#M402.6 83.2l90.2 90.2c3.8 3.8 3.8 10 0 13.8L274.4 405.6l-92.8 10.3c-12.4 1.4-22.9-9.1-21.5-21.5l10.3-92.8L388.8 83.2c3.8-3.8 10-3.8 13.8 0zm162-22.9l-48.8-48.8c-15.2-15.2-39.9-15.2-55.2 0l-35.4 35.4c-3.8 3.8-3.8 10 0 13.8l90.2 90.2c3.8 3.8 10 3.8 13.8 0l35.4-35.4c15.2-15.3 15.2-40 0-55.2zM384 346.2V448H64V128h229.8c3.2 0 6.2-1.3 8.5-3.5l40-40c7.6-7.6 2.2-20.5-8.5-20.5H48C21.5 64 0 85.5 0 112v352c0 26.5 21.5 48 48 48h352c26.5 0 48-21.5 48-48V306.2c0-10.7-12.9-16-20.5-8.5l-40 40c-2.2 2.3-3.5 5.3-3.5 8.5z#svgend#';
 	var tohtml = '';
 	if(activevar(loggningar)){
 		var tosort = [];
@@ -192,7 +198,7 @@ function htmltidloggningar(loggningar){
 				var utdobj = {tid: ''};
 			};
 			var time = timebetween('', '', (sorted[i].ut - sorted[i].in));
-			var tohtml = tohtml + '<tr data-milisecin="' + sorted[i].in + '" data-milisecut="' + sorted[i].ut + '"><td>' + indobj.datum + '</td><td>' + indobj.tid + '</td><td>' + utdobj.tid + '</td><td>' + addzero(time.t) + ':' + addzero(time.m) + ':' + addzero(time.s) + '</td><td>#iconstart#fas fa-trash-alt fa-3x#iconextra#onclick="removesegment(this);"#iconend##iconstart#fas fa-edit fa-3x#iconextra#onclick="showedit(this);"#iconend#</td></tr>';
+			var tohtml = tohtml + '<tr data-milisecin="' + sorted[i].in + '" data-milisecut="' + sorted[i].ut + '"><td>' + indobj.datum + '</td><td>' + indobj.tid + '</td><td>' + utdobj.tid + '</td><td>' + addzero(time.t) + ':' + addzero(time.m) + ':' + addzero(time.s) + '</td><td>' + tabort + redigera + '</td></tr>';
 		};
 	};
 	return tohtml;
@@ -314,7 +320,8 @@ function statstohtml(statdata, datum){
 		return '';
 	}else{
 		var preandnext = monthbeforeandafter(datum.join('-'));
-		var tohtml = '<div class="center"><table><tbody><tr><td>#iconstart#fas fa-arrow-circle-left fa-3x#iconextra#onclick="nextpie(\'' + preandnext.prev + '\')"#iconend#</td><td id="piedatum">' + datum.join('-') + '</td><td>#iconstart#fas fa-arrow-circle-right fa-3x#iconextra#onclick="nextpie(\'' + preandnext.next + '\')"#iconend#</td></tr></tbody></table></div>';
+		//var tohtml = '<div class="center"><table><tbody><tr><td>#iconstart#fas fa-arrow-circle-left fa-3x#iconextra#onclick="nextpie(\'' + preandnext.prev + '\')"#iconend#</td><td id="piedatum">' + datum.join('-') + '</td><td>#iconstart#fas fa-arrow-circle-right fa-3x#iconextra#onclick="nextpie(\'' + preandnext.next + '\')"#iconend#</td></tr></tbody></table></div>';
+		var tohtml = '<div class="center"><table><tbody><tr><td>#svgstart#0 0 512 512" onclick="nextpie(\'' + preandnext.prev + '\');#svginside#M256 504C119 504 8 393 8 256S119 8 256 8s248 111 248 248-111 248-248 248zm28.9-143.6L209.4 288H392c13.3 0 24-10.7 24-24v-16c0-13.3-10.7-24-24-24H209.4l75.5-72.4c9.7-9.3 9.9-24.8.4-34.3l-11-10.9c-9.4-9.4-24.6-9.4-33.9 0L107.7 239c-9.4 9.4-9.4 24.6 0 33.9l132.7 132.7c9.4 9.4 24.6 9.4 33.9 0l11-10.9c9.5-9.5 9.3-25-.4-34.3z#svgend#</td><td id="piedatum">' + datum.join('-') + '</td><td>#svgstart#0 0 512 512" onclick="nextpie(\'' + preandnext.next + '\');#svginside#M256 8c137 0 248 111 248 248S393 504 256 504 8 393 8 256 119 8 256 8zm-28.9 143.6l75.5 72.4H120c-13.3 0-24 10.7-24 24v16c0 13.3 10.7 24 24 24h182.6l-75.5 72.4c-9.7 9.3-9.9 24.8-.4 34.3l11 10.9c9.4 9.4 24.6 9.4 33.9 0L404.3 273c9.4-9.4 9.4-24.6 0-33.9L271.6 106.3c-9.4-9.4-24.6-9.4-33.9 0l-11 10.9c-9.5 9.6-9.3 25.1.4 34.4z#svgend#</td></tr></tbody></table></div>';
 		var tohtml = tohtml + '<div id="detalj" class="center"><table id="detaljtable"><tbody>';
 		var sammanmanad = 0;
 		var chartData = ['["Projekt", "Tid i Millisekunder"]'];
@@ -335,6 +342,13 @@ function statstohtml(statdata, datum){
 	};
 };
 function settingtohtml(vgrid, namn, projekt){
+	var plusicon = '#svgstart#0 0 448 512" onclick="addprojekt();#svginside#M400 32H48C21.5 32 0 53.5 0 80v352c0 26.5 21.5 48 48 48h352c26.5 0 48-21.5 48-48V80c0-26.5-21.5-48-48-48zm-32 252c0 6.6-5.4 12-12 12h-92v92c0 6.6-5.4 12-12 12h-56c-6.6 0-12-5.4-12-12v-92H92c-6.6 0-12-5.4-12-12v-56c0-6.6 5.4-12 12-12h92v-92c0-6.6 5.4-12 12-12h56c6.6 0 12 5.4 12 12v92h92c6.6 0 12 5.4 12 12v56z#svgend#';
+	var editiconone = '#svgstart#0 0 576 512';
+	var editicontwo = '#svginside#M402.6 83.2l90.2 90.2c3.8 3.8 3.8 10 0 13.8L274.4 405.6l-92.8 10.3c-12.4 1.4-22.9-9.1-21.5-21.5l10.3-92.8L388.8 83.2c3.8-3.8 10-3.8 13.8 0zm162-22.9l-48.8-48.8c-15.2-15.2-39.9-15.2-55.2 0l-35.4 35.4c-3.8 3.8-3.8 10 0 13.8l90.2 90.2c3.8 3.8 10 3.8 13.8 0l35.4-35.4c15.2-15.3 15.2-40 0-55.2zM384 346.2V448H64V128h229.8c3.2 0 6.2-1.3 8.5-3.5l40-40c7.6-7.6 2.2-20.5-8.5-20.5H48C21.5 64 0 85.5 0 112v352c0 26.5 21.5 48 48 48h352c26.5 0 48-21.5 48-48V306.2c0-10.7-12.9-16-20.5-8.5l-40 40c-2.2 2.3-3.5 5.3-3.5 8.5z#svgend#';
+	var showiconone = '#svgstart#0 0 576 512';
+	var showicontwo = '#svginside#M572.52 241.4C518.29 135.59 410.93 64 288 64S57.68 135.64 3.48 241.41a32.35 32.35 0 0 0 0 29.19C57.71 376.41 165.07 448 288 448s230.32-71.64 284.52-177.41a32.35 32.35 0 0 0 0-29.19zM288 400a144 144 0 1 1 144-144 143.93 143.93 0 0 1-144 144zm0-240a95.31 95.31 0 0 0-25.31 3.79 47.85 47.85 0 0 1-66.9 66.9A95.78 95.78 0 1 0 288 160z#svgend#';
+	var hideiconone = '#svgstart#0 0 640 512" style="opacity: 0.5;';
+	var hideicontwo = '#svginside#M320 400c-75.85 0-137.25-58.71-142.9-133.11L72.2 185.82c-13.79 17.3-26.48 35.59-36.72 55.59a32.35 32.35 0 0 0 0 29.19C89.71 376.41 197.07 448 320 448c26.91 0 52.87-4 77.89-10.46L346 397.39a144.13 144.13 0 0 1-26 2.61zm313.82 58.1l-110.55-85.44a331.25 331.25 0 0 0 81.25-102.07 32.35 32.35 0 0 0 0-29.19C550.29 135.59 442.93 64 320 64a308.15 308.15 0 0 0-147.32 37.7L45.46 3.37A16 16 0 0 0 23 6.18L3.37 31.45A16 16 0 0 0 6.18 53.9l588.36 454.73a16 16 0 0 0 22.46-2.81l19.64-25.27a16 16 0 0 0-2.82-22.45zm-183.72-142l-39.3-30.38A94.75 94.75 0 0 0 416 256a94.76 94.76 0 0 0-121.31-92.21A47.65 47.65 0 0 1 304 192a46.64 46.64 0 0 1-1.54 10l-73.61-56.89A142.31 142.31 0 0 1 320 112a143.92 143.92 0 0 1 144 144c0 21.63-5.29 41.79-13.9 60.11z#svgend#';
 	if(!projekt){
 		return '';
 	}else{
@@ -343,9 +357,9 @@ function settingtohtml(vgrid, namn, projekt){
 		var visa = []
 		for (var a = 0; a < projekt.length; a++){
 			if(!projekt[a].indexOf(param.oldprojekt) == 0){
-				var tablecontent = tablecontent + '<tr><td><p>' + projekt[a] + '</p></td><td><i class="fas fa-edit fa-3x" onclick="edit(this);"></i></td><td><i class="fas fa-eye fa-3x" data-synlig="true" onclick="togglesynlig(this);"></i></td></tr>';
+				var tablecontent = tablecontent + '<tr><td><p>' + projekt[a] + '</p></td><td>' + editiconone + '" onclick="edit(this);' + editicontwo + '</td><td>' + showiconone + '" onclick="togglesynlig(this);' + showicontwo + '</td></tr>';
 			}else{
-				var tablecontent = tablecontent + '<tr><td><p>' + projekt[a].replace(param.oldprojekt, '') + '</p></td><td><i class="fas fa-edit fa-3x disable"></i></td><td><i class="fas fa-eye-slash fa-3x" data-synlig="false" onclick="togglesynlig(this);"></i></td></tr>';
+				var tablecontent = tablecontent + '<tr><td><p>' + projekt[a].replace(param.oldprojekt, '') + '</p></td><td>' + editiconone + '" class="disable' + editicontwo + '</td><td>' + hideiconone + '" data-synlig="false" onclick="togglesynlig(this);' + hideicontwo + '</td></tr>';
 			};
 		};
 		var splitnamn = namn.split(' ');
@@ -353,7 +367,7 @@ function settingtohtml(vgrid, namn, projekt){
 		var tohmtl = tohmtl + '<p>Användarnamn:</p><input type="text" name="anv" value="' + vgrid + '">';
 		var tohmtl = tohmtl + '<p>Förnamn:</p><input type="text" name="fnamn" value="' + splitnamn[0] + '">';
 		var tohmtl = tohmtl + '<p>Efternamn:</p><input type="text" name="enamn" value="' + splitnamn.splice(1, splitnamn.length - 1).join(' ') + '">';
-		var tohmtl = tohmtl + '<p>Projekt/Anställningar</p><div class="divtable"><div class="divline"><div class="divruta"><input type="text" id="projektinput"></div><div class="divruta"><i class="fas fa-plus-square fa-3x" onclick="addprojekt();"></i></div></div></div>';
+		var tohmtl = tohmtl + '<p>Projekt/Anställningar</p><div class="divtable"><div class="divline"><div class="divruta"><input type="text" id="projektinput"></div><div class="divruta">' + plusicon + '</div></div></div>';
 		var tohmtl = tohmtl + '<table><tbody id="projektlista">';
 		var tohmtl = tohmtl + tablecontent + '</tbody></table>';
 		return tohmtl;
@@ -402,7 +416,10 @@ app.engine('html', function (filePath, options, callback) {
     	.replace('#rapport#', rapport)
     	.replace('#statrender#', statrender)
     	.replace('#settingform#', settings)
-    	.replace('#tillbakaknapp#', '#iconstart#fas fa-arrow-circle-left fa-3x#iconextra#onclick="tillbakatillprojekt();"#iconend#')
+    	.replace('#tillbakaknapp#', '#svgstart#0 0 512 512" class="backbutton" onclick="tillbakatillprojekt();#svginside#M256 504C119 504 8 393 8 256S119 8 256 8s248 111 248 248-111 248-248 248zm28.9-143.6L209.4 288H392c13.3 0 24-10.7 24-24v-16c0-13.3-10.7-24-24-24H209.4l75.5-72.4c9.7-9.3 9.9-24.8.4-34.3l-11-10.9c-9.4-9.4-24.6-9.4-33.9 0L107.7 239c-9.4 9.4-9.4 24.6 0 33.9l132.7 132.7c9.4 9.4 24.6 9.4 33.9 0l11-10.9c9.5-9.5 9.3-25-.4-34.3z#svgend#')
+    	.replace(/#svgstart#/g, '<svg aria-hidden="true"  role="img" xmlns="http://www.w3.org/2000/svg" viewBox="')
+    	.replace(/#svginside#/g, '"><path fill="currentColor" d="')
+    	.replace(/#svgend#/g, '"></path></svg>')
     	.replace(/#iconstart#/g, '<i class="')
     	.replace(/#iconextra#/g, '" aria-hidden="true" ')
     	.replace(/#iconend#/g, '></i>') //#iconstart# #iconextra# #iconend#

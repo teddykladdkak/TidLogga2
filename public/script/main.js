@@ -21,7 +21,13 @@ function getDate(dateannan, timeannan, milisecsave){
 	var tid = addzero(h) + ':' + addzero(mm);
 	return {"datum": datum, "tid": tid, "milisec": milisec, "manad": manad};
 };
-function removechilds(parent){while (parent.hasChildNodes()) {parent.removeChild(parent.firstChild);};};
+function removechilds(parent){
+	if(parent.hasChildNodes()){
+		while (parent.hasChildNodes()) {
+			parent.removeChild(parent.firstChild);
+		};
+	};
+};
 function timebetween(start, stop, millisec){
 	if(!millisec){
 		var sekunder = parseInt(stop) / 1000 - parseInt(start) / 1000;
