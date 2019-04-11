@@ -199,7 +199,10 @@ td{
 #loggwrapper table tbody td{
 	padding: 10px;
 }
-@media screen and (max-width: 300px) {
+@media screen and (max-width: 340px) {
+	.watch, #klocka .disable {
+		display: none;
+	}
 	.divtable{
 		display: block;
 	}
@@ -217,9 +220,10 @@ td{
 		margin: 0px;
 	}
 	.center{
-		display: inline-block;
-		align-items: left;
-		justify-content: left;
+		display: block;
+		align-items: center;
+		justify-content: center;
+		text-align: center;
 	}
 }
 @media screen and (max-width: 700px) {
