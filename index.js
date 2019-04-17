@@ -145,7 +145,7 @@ function htmlstartstoptime(inklockad, starttime, stoptime){
 	var stoptwo = '#svginside#M400 32H48C21.5 32 0 53.5 0 80v352c0 26.5 21.5 48 48 48h352c26.5 0 48-21.5 48-48V80c0-26.5-21.5-48-48-48z#svgend#';
 	// Vilka knappar som ska visas i inloggad
 		var utklockbuttons = startone + 'class="disable' + starttwo + stopone + 'class="enable" onclick="stopclock(\'nu\');' + stoptwo;
-		var utklockbuttonsannat = startone + 'class="disable' + starttwo + stopone + 'class="enable" onclick="stopclock="annantid(\'ut\');' + stoptwo;
+		var utklockbuttonsannat = startone + 'class="disable' + starttwo + stopone + 'class="enable" onclick="annantid(\'ut\');' + stoptwo;
 		var inklockbuttons = startone + 'class="enable" onclick="startclock(\'nu\')' + starttwo + stopone + 'class="disable' + stoptwo;
 		var inklockbuttonsannat = startone + 'class="enable" onclick="annantid(\'in\')' + starttwo + stopone + 'class="disable' + stoptwo;
 		var timecount = '';
