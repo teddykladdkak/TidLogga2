@@ -13,7 +13,7 @@ var param = {
 	port: 7788,
 	titel: 'TidLogga',
 	beskrivning: 'Tidloggning när det är som bäst! Minimalistiskt, ikonbaserat utseende för snabbare interaktion!',
-	url: 'http://www.tidlogga.tk/',
+	url: 'https://tidlogga.teddyprojekt.se/',
 	keywords: 'sjuksköterska, teddy, projekt, teddyprojekt, html, css, javascript, jquery, teddykladdkak, teddy__kladdkaka, teddysweden, eHälsa, eNursing, eHealth, medicinteknik, projekt, projektledning, tid, logg',
 	link: {
 		icons: 'ico/',
